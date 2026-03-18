@@ -67,6 +67,13 @@ function SuppliersContent() {
           </select>
         </div>
 
+        {status === 'PENDING' && suppliers.length > 0 && (
+          <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3">
+            <AlertTriangle size={18} className="text-yellow-600 shrink-0" />
+            <p className="text-sm text-yellow-800 font-medium">{suppliers.length} supplier{suppliers.length !== 1 ? 's' : ''} awaiting verification — review and approve or reject below.</p>
+          </div>
+        )}
+
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-gray-400">Loading...</div>
@@ -75,26 +82,31 @@ function SuppliersContent() {
           ) : (
             <div className="divide-y divide-gray-50">
               {suppliers.map((s) => (
-                <div key={s.id} className="p-4 flex items-center justify-between gap-4">
+                <div key={s.id} className={`p-4 flex items-start justify-between gap-4 ${s.status === 'PENDING' ? 'bg-yellow-50/40' : ''}`}>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-gray-900">{s.companyName}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${supplierStatusColor(s.status)}`}>{s.status}</span>
+                      {s.status === 'PENDING' && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-semibold animate-pulse">Awaiting Approval</span>}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{s.user.email} · Reg: {s.registrationNo}</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="text-xs text-gray-400">{s._count.documents} doc{s._count.documents !== 1 ? 's' : ''}</span>
-                      <span className="text-xs text-gray-400">{s._count.quotations} quote{s._count.quotations !== 1 ? 's' : ''}</span>
-                      <span className="text-xs text-gray-400">Risk: {s.riskScore}</span>
-                      <span className="text-xs text-gray-400">Joined {formatDate(s.createdAt)}</span>
+                    <p className="text-xs text-gray-500 mt-0.5">{s.user.firstName} {s.user.lastName} · {s.user.email}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Reg No: {s.registrationNo} · Joined {formatDate(s.createdAt)}</p>
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                      <span className="text-xs text-gray-400">{s.categories.map(c => c.category.name).join(', ')}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
                     {s.status === 'PENDING' && (
-                      <button onClick={() => changeStatus(s.id, 'ACTIVE')} disabled={actionLoading === s.id}
-                        className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-800 disabled:opacity-60">
-                        <CheckCircle2 size={14} /> Activate
-                      </button>
+                      <>
+                        <button onClick={() => changeStatus(s.id, 'ACTIVE')} disabled={actionLoading === s.id}
+                          className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-800 disabled:opacity-60">
+                          <CheckCircle2 size={14} /> Approve
+                        </button>
+                        <button onClick={() => changeStatus(s.id, 'DEBARRED')} disabled={actionLoading === s.id}
+                          className="flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700 disabled:opacity-60">
+                          <XCircle size={14} /> Reject
+                        </button>
+                      </>
                     )}
                     {s.status === 'ACTIVE' && (
                       <button onClick={() => changeStatus(s.id, 'SUSPENDED')} disabled={actionLoading === s.id}
@@ -108,7 +120,7 @@ function SuppliersContent() {
                         <XCircle size={14} /> Debar
                       </button>
                     )}
-                    {s.status !== 'ACTIVE' && s.status !== 'PENDING' && (
+                    {(s.status === 'SUSPENDED' || s.status === 'DEBARRED') && (
                       <button onClick={() => changeStatus(s.id, 'ACTIVE')} disabled={actionLoading === s.id}
                         className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-800 disabled:opacity-60">
                         <CheckCircle2 size={14} /> Reinstate

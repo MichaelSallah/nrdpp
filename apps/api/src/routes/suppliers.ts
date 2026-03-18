@@ -69,7 +69,18 @@ supplierRoutes.post('/register', authenticate, authorize(Role.SUPPLIER), async (
 
   await logAudit({ entityType: 'supplier', entityId: supplier.id, action: 'registered', actorId: userId, req })
 
-  res.status(201).json({ success: true, supplier })
+  // Notify all admins that a new supplier is pending approval
+  const admins = await prisma.user.findMany({ where: { role: Role.ADMIN } })
+  await Promise.all(admins.map((admin) =>
+    createNotification({
+      userId: admin.id,
+      type: NotificationType.SUPPLIER_REGISTERED,
+      title: 'New Supplier Pending Approval',
+      body: `${data.companyName} has registered and is awaiting verification.`,
+    })
+  ))
+
+  res.status(201).json({ success: true, supplier, message: 'Registration submitted. Awaiting admin approval.' })
 })
 
 // ── Get supplier profile ──

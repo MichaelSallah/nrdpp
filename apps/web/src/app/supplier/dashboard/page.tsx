@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { TopBar } from '@/components/layout/TopBar'
 import { api } from '@/lib/api'
-import { rfqStatusColor, timeUntilDeadline, supplierStatusColor } from '@/lib/utils'
-import { FileText, ArrowRight, AlertTriangle, CheckCircle2, Clock, TrendingUp, Award, ShieldCheck } from 'lucide-react'
+import { supplierStatusColor } from '@/lib/utils'
+import { FileText, ArrowRight, AlertTriangle, CheckCircle2, Award, ShieldCheck } from 'lucide-react'
+import { Countdown } from '@/components/ui/Countdown'
 
 interface Rfq {
   id: string; referenceNo: string; title: string; status: string
@@ -52,8 +53,19 @@ export default function SupplierDashboard() {
       <TopBar title="Supplier Dashboard" />
       <div className="p-6 max-w-6xl mx-auto">
 
+        {/* Pending approval banner */}
+        {supplier?.status === 'PENDING' && (
+          <div className="mb-6 bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle size={20} className="text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-amber-900">Account Pending Approval</p>
+              <p className="text-sm text-amber-700 mt-0.5">Your registration has been submitted and is currently under review by the platform administrator. You will be able to participate in RFQs once approved.</p>
+            </div>
+          </div>
+        )}
+
         {/* Compliance Status Banner */}
-        {supplier && (
+        {supplier && supplier.status !== 'PENDING' && (
           <div className={`mb-6 rounded-xl border p-4 ${compliance?.compliant ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
             <div className="flex items-start gap-4">
               {compliance?.compliant
@@ -108,7 +120,7 @@ export default function SupplierDashboard() {
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="w-9 h-9 bg-orange-100 text-orange-700 rounded-lg flex items-center justify-center mb-3">
-                <Clock size={18} />
+                <FileText size={18} />
               </div>
               <p className="text-2xl font-bold text-gray-900">{quotationStats.pending}</p>
               <p className="text-xs text-gray-500 mt-0.5">Pending Review</p>
@@ -141,7 +153,7 @@ export default function SupplierDashboard() {
             <div className="p-8 text-center text-gray-400">Loading...</div>
           ) : rfqs.length === 0 ? (
             <div className="p-8 text-center">
-              <Clock size={40} className="text-gray-200 mx-auto mb-3" />
+              <FileText size={40} className="text-gray-200 mx-auto mb-3" />
               <p className="text-gray-500">No open RFQs at the moment.</p>
             </div>
           ) : (
@@ -153,21 +165,19 @@ export default function SupplierDashboard() {
                 return (
                   <Link key={rfq.id} href={`/supplier/rfqs/${rfq.id}`} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <p className="font-medium text-gray-900 truncate">{rfq.title}</p>
                         {urgent && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold shrink-0">Urgent</span>}
                         {closing && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-semibold shrink-0">Closing Soon</span>}
                       </div>
                       <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                        <span>{rfq.referenceNo}</span>
-                        <span>•</span>
-                        <span>{rfq.entity.name}</span>
-                        <span>•</span>
+                        <span>{rfq.referenceNo}</span><span>•</span>
+                        <span>{rfq.entity.name}</span><span>•</span>
                         <span>{rfq.category.name}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 ml-4 shrink-0">
-                      <p className={`text-xs font-medium ${urgent ? 'text-red-600' : 'text-orange-500'}`}>{timeUntilDeadline(rfq.submissionDeadline)}</p>
+                      <Countdown deadline={rfq.submissionDeadline} variant="compact" />
                       <ArrowRight size={16} className="text-gray-300" />
                     </div>
                   </Link>

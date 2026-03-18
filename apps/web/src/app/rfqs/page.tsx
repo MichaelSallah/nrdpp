@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useState, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api'
-import { rfqStatusColor, timeUntilDeadline, formatCurrency, formatDate } from '@/lib/utils'
-import { Search, Clock, FileText, Building2, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react'
+import { rfqStatusColor, formatCurrency, formatDate } from '@/lib/utils'
+import { Search, FileText, Building2, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { PublicNav } from '@/components/layout/PublicNav'
+import { Countdown } from '@/components/ui/Countdown'
 
 interface Rfq {
   id: string; referenceNo: string; title: string; description: string
@@ -29,7 +30,6 @@ const PAGE_SIZE = 10
 
 function MarketplaceContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const [rfqs, setRfqs] = useState<Rfq[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -127,13 +127,12 @@ function MarketplaceContent() {
 
             <div className="space-y-4">
               {paged.map((rfq) => {
-                const deadline = new Date(rfq.submissionDeadline)
-                const hoursLeft = (deadline.getTime() - Date.now()) / 3600000
+                const hoursLeft = (new Date(rfq.submissionDeadline).getTime() - Date.now()) / 3600000
                 const urgent = hoursLeft < 24
                 const closing = hoursLeft < 48 && hoursLeft >= 24
                 return (
                   <div key={rfq.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
                           <span className="font-mono text-xs text-gray-400">{rfq.referenceNo}</span>
@@ -149,18 +148,14 @@ function MarketplaceContent() {
                             <Building2 size={13} />
                             <span>{rfq.entity.name}</span>
                           </div>
-                          <div className={`flex items-center gap-1.5 ${urgent ? 'text-red-500 font-medium' : ''}`}>
-                            <Clock size={13} />
-                            <span>{timeUntilDeadline(rfq.submissionDeadline)}</span>
-                          </div>
                           {rfq.budget && <span>Budget: {formatCurrency(rfq.budget)}</span>}
                           <span>{rfq._count.suppliers} invited · {rfq._count.quotations} quotes</span>
                         </div>
                       </div>
-                      <div className="shrink-0 flex flex-col items-end gap-2">
+                      <div className="shrink-0 flex flex-col items-end gap-3">
                         <div className="text-right text-xs text-gray-400">
-                          <p>Closes</p>
-                          <p className="font-medium text-gray-600">{formatDate(rfq.submissionDeadline)}</p>
+                          <p className="mb-1">Closes {formatDate(rfq.submissionDeadline)}</p>
+                          <Countdown deadline={rfq.submissionDeadline} variant="full" />
                         </div>
                         <Link href="/login"
                           className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-800 transition-colors">

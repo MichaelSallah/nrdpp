@@ -28,14 +28,30 @@ dotenv.config()
 const app = express()
 const httpServer = createServer(app)
 
+const allowedOrigins = (process.env.WEB_URL || 'http://localhost:3001,http://localhost:3002')
+  .split(',')
+  .map(o => o.trim())
+
+const corsOptions = {
+  origin: (origin: string | undefined, cb: (e: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (mobile, curl, etc) or from serveo / localhost
+    if (!origin || origin.includes('serveousercontent.com') || allowedOrigins.includes(origin)) {
+      cb(null, true)
+    } else {
+      cb(null, true) // open in dev — tighten in production
+    }
+  },
+  credentials: true,
+}
+
 // Socket.io
 export const io = new SocketServer(httpServer, {
-  cors: { origin: process.env.WEB_URL || 'http://localhost:3000', credentials: true },
+  cors: corsOptions,
 })
 
 // Middleware
 app.use(helmet())
-app.use(cors({ origin: process.env.WEB_URL || 'http://localhost:3000', credentials: true }))
+app.use(cors(corsOptions))
 app.use(morgan('dev'))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))

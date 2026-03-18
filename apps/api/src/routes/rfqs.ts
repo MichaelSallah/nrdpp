@@ -13,7 +13,7 @@ export const rfqRoutes = Router()
 const rfqSchema = z.object({
   title: z.string().min(5),
   description: z.string().min(10),
-  type: z.nativeEnum(RfqCategory),
+  type: z.nativeEnum(RfqCategory).default(RfqCategory.GOODS),
   categoryId: z.string(),
   budgetEstimate: z.coerce.number().positive().optional(),
   currency: z.string().default('GHS'),

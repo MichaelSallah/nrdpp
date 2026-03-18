@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react'
 import { TopBar } from '@/components/layout/TopBar'
 import { api } from '@/lib/api'
-import { rfqStatusColor, timeUntilDeadline } from '@/lib/utils'
+import { rfqStatusColor } from '@/lib/utils'
 import Link from 'next/link'
 import { Plus, Search, FileText } from 'lucide-react'
+import { Countdown } from '@/components/ui/Countdown'
 
 interface Rfq {
   id: string; referenceNo: string; title: string; status: string
@@ -79,7 +80,7 @@ export default function BuyerRfqsPage() {
                     <td className="px-4 py-3.5 font-medium text-gray-900 max-w-xs truncate">{rfq.title}</td>
                     <td className="px-4 py-3.5 text-gray-500 hidden sm:table-cell">{rfq.category.name}</td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
-                      <span className="text-orange-600 text-xs">{timeUntilDeadline(rfq.submissionDeadline)}</span>
+                      {rfq.status === 'OPEN' ? <Countdown deadline={rfq.submissionDeadline} variant="compact" /> : <span className="text-gray-400 text-xs">—</span>}
                     </td>
                     <td className="px-4 py-3.5 text-gray-500 hidden md:table-cell">{rfq._count.quotations}</td>
                     <td className="px-4 py-3.5">

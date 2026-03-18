@@ -11,7 +11,6 @@ import { Plus, Trash2, Loader2, ChevronRight, ChevronLeft } from 'lucide-react'
 const schema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(10, 'Provide a detailed description'),
-  type: z.enum(['GOODS', 'WORKS', 'SERVICES']),
   categoryId: z.string().min(1, 'Select a category'),
   budgetEstimate: z.coerce.number().positive('Enter a valid budget').optional(),
   currency: z.string().default('GHS'),
@@ -104,27 +103,15 @@ export default function CreateRfqPage() {
                   <textarea {...register('description')} rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none" placeholder="Describe what you need in detail..." />
                   {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                    <select {...register('type')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                      <option value="">Select type</option>
-                      <option value="GOODS">Goods</option>
-                      <option value="WORKS">Works</option>
-                      <option value="SERVICES">Services</option>
-                    </select>
-                    {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                    <select {...register('categoryId')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
-                      <option value="">Select category</option>
-                      {allCategories.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                    {errors.categoryId && <p className="text-red-500 text-xs mt-1">{errors.categoryId.message}</p>}
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                  <select {...register('categoryId')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="">Select category</option>
+                    {allCategories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  {errors.categoryId && <p className="text-red-500 text-xs mt-1">{errors.categoryId.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -218,7 +205,6 @@ export default function CreateRfqPage() {
                     <p className="font-semibold text-gray-900 mb-2">RFQ Details</p>
                     <dl className="space-y-1">
                       <div className="flex justify-between"><dt className="text-gray-500">Title</dt><dd className="text-gray-900 font-medium">{values.title}</dd></div>
-                      <div className="flex justify-between"><dt className="text-gray-500">Type</dt><dd>{values.type}</dd></div>
                       <div className="flex justify-between"><dt className="text-gray-500">Budget Estimate</dt><dd>GHS {values.budgetEstimate?.toLocaleString() || 'Not specified'}</dd></div>
                       <div className="flex justify-between"><dt className="text-gray-500">Deadline</dt><dd>{values.submissionDeadline ? new Date(values.submissionDeadline).toLocaleString() : '-'}</dd></div>
                       <div className="flex justify-between"><dt className="text-gray-500">Min. Quotations</dt><dd>{values.minimumQuotations}</dd></div>
