@@ -7,8 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import { Loader2, Eye, EyeOff } from 'lucide-react'
+import { Loader2, Eye, EyeOff, Building2, Truck, Shield } from 'lucide-react'
 import { PublicNav } from '@/components/layout/PublicNav'
+import { cn } from '@/lib/utils'
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -16,9 +17,36 @@ const schema = z.object({
 })
 type FormData = z.infer<typeof schema>
 
+type PortalRole = 'BUYER' | 'SUPPLIER' | 'ADMIN'
+
+const portals: { role: PortalRole; label: string; icon: React.ElementType; desc: string; placeholder: string }[] = [
+  {
+    role: 'BUYER',
+    label: 'Buyer',
+    icon: Building2,
+    desc: 'Sign in to create and manage RFQs for your organisation.',
+    placeholder: 'procurement@organisation.gov',
+  },
+  {
+    role: 'SUPPLIER',
+    label: 'Supplier',
+    icon: Truck,
+    desc: 'Sign in to browse open RFQs and submit your quotations.',
+    placeholder: 'info@yourcompany.com',
+  },
+  {
+    role: 'ADMIN',
+    label: 'Admin',
+    icon: Shield,
+    desc: 'Platform administrator access for managing entities and users.',
+    placeholder: 'admin@nrdpp.gov',
+  },
+]
+
 export default function LoginPage() {
   const router = useRouter()
   const { setAuth } = useAuthStore()
+  const [portal, setPortal] = useState<PortalRole>('BUYER')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
 
@@ -36,9 +64,11 @@ export default function LoginPage() {
       else if (role === 'BUYER') router.push('/buyer/dashboard')
       else router.push('/supplier/dashboard')
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Login failed')
+      setError(e instanceof Error ? e.message : 'Invalid email or password')
     }
   }
+
+  const activePortal = portals.find(p => p.role === portal)!
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 to-green-800 flex flex-col">
@@ -46,13 +76,43 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-            <p className="text-green-300 text-sm mt-1">Sign in to your NRDPP account</p>
+
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-white">Sign In to NRDPP</h1>
+            <p className="text-green-300 text-sm mt-1">Select your portal to continue</p>
+          </div>
+
+          {/* Portal selector */}
+          <div className="grid grid-cols-3 gap-2 mb-5">
+            {portals.map(({ role, label, icon: Icon }) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => { setPortal(role); setError('') }}
+                className={cn(
+                  'flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all text-sm font-medium',
+                  portal === role
+                    ? 'border-yellow-400 bg-yellow-400/10 text-yellow-300'
+                    : 'border-green-700 bg-green-800/50 text-green-400 hover:border-green-500 hover:text-green-200'
+                )}
+              >
+                <Icon size={20} />
+                {label}
+              </button>
+            ))}
           </div>
 
           <div className="bg-white rounded-2xl shadow-2xl p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Sign In</h2>
+            {/* Portal header */}
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-700">
+                <activePortal.icon size={20} />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900">{activePortal.label} Portal</h2>
+                <p className="text-xs text-gray-500">{activePortal.desc}</p>
+              </div>
+            </div>
 
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
@@ -65,7 +125,7 @@ export default function LoginPage() {
                   {...register('email')}
                   type="email"
                   autoComplete="email"
-                  placeholder="you@example.com"
+                  placeholder={activePortal.placeholder}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -94,17 +154,21 @@ export default function LoginPage() {
                 className="w-full bg-green-700 hover:bg-green-800 text-white py-2.5 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-                {isSubmitting ? 'Signing in...' : 'Sign In'}
+                {isSubmitting ? 'Signing in...' : `Sign In as ${activePortal.label}`}
               </button>
             </form>
 
-            <p className="text-center text-sm text-gray-600 mt-6">
-              Don't have an account?{' '}
-              <Link href="/register" className="text-green-700 font-medium hover:underline">Register here</Link>
-            </p>
+            {portal !== 'ADMIN' && (
+              <p className="text-center text-sm text-gray-600 mt-5">
+                No account?{' '}
+                <Link href={`/register?role=${portal}`} className="text-green-700 font-medium hover:underline">
+                  Register as {activePortal.label}
+                </Link>
+              </p>
+            )}
           </div>
 
-          <p className="text-center text-green-400 text-xs mt-6">
+          <p className="text-center text-green-400 text-xs mt-5">
             NRDPP – Secure Digital Procurement for All Sectors
           </p>
         </div>
