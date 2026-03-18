@@ -1,4 +1,7 @@
-'use client'
+const fs = require('fs')
+const path = require('path')
+
+const content = `'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Shield, BarChart3, Bell, FileText, Users, Clock, CheckCircle2, Monitor, Truck, Building2, FlaskConical, Package } from 'lucide-react'
@@ -94,7 +97,7 @@ export default function HomePage() {
             const Icon = cat.icon
             return (
               <Link key={cat.code} href={cat.code ? '/rfqs?category=' + cat.code : '/rfqs'}
-                className={`flex flex-col items-center gap-3 p-5 rounded-xl border ${cat.color} hover:shadow-md transition-all text-center group`}>
+                className={\`flex flex-col items-center gap-3 p-5 rounded-xl border \${cat.color} hover:shadow-md transition-all text-center group\`}>
                 <Icon size={28} className="group-hover:scale-110 transition-transform" />
                 <span className="text-xs font-semibold leading-snug">{cat.label}</span>
               </Link>
@@ -249,3 +252,7 @@ export default function HomePage() {
     </div>
   )
 }
+`
+
+fs.writeFileSync(path.join('C:\\', 'Users', 'MICHAELSALLAH', 'nrdpp', 'apps', 'web', 'src', 'app', 'page.tsx'), content, 'utf8')
+console.log('Home page written successfully, lines:', content.split('\n').length)

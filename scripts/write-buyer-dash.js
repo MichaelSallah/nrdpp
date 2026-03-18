@@ -1,4 +1,6 @@
-'use client'
+const fs = require('fs'), path = require('path')
+
+const content = `'use client'
 import { useEffect, useState } from 'react'
 import { TopBar } from '@/components/layout/TopBar'
 import { api } from '@/lib/api'
@@ -45,7 +47,7 @@ export default function BuyerDashboard() {
         {/* Personalised greeting */}
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-900">
-            {greeting}{user?.firstName ? `, ${user.firstName}` : ''}! 👋
+            {greeting}{user?.firstName ? \`, \${user.firstName}\` : ''}! 👋
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">Here's an overview of your procurement activity.</p>
         </div>
@@ -73,7 +75,7 @@ export default function BuyerDashboard() {
             { label: 'Award Rate', value: awardRate + '%', icon: TrendingUp, color: 'bg-blue-100 text-blue-700', href: '/buyer/reports' },
           ].map(({ label, value, icon: Icon, color, href }) => (
             <Link key={label} href={href} className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
-              <div className={`w-9 h-9 ${color} rounded-lg flex items-center justify-center mb-3`}>
+              <div className={\`w-9 h-9 \${color} rounded-lg flex items-center justify-center mb-3\`}>
                 <Icon size={18} />
               </div>
               <p className="text-2xl font-bold text-gray-900">{value}</p>
@@ -120,12 +122,12 @@ export default function BuyerDashboard() {
                 const closingSoon = rfq.status === 'OPEN' && hoursLeft < 48 && hoursLeft >= 24
                 const quotaWarning = rfq.status === 'OPEN' && rfq._count.quotations < 3
                 return (
-                  <Link key={rfq.id} href={`/buyer/rfqs/${rfq.id}`}
+                  <Link key={rfq.id} href={\`/buyer/rfqs/\${rfq.id}\`}
                     className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <p className="font-medium text-gray-900 truncate">{rfq.title}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rfqStatusColor(rfq.status)}`}>{rfq.status}</span>
+                        <span className={\`text-xs px-2 py-0.5 rounded-full font-medium \${rfqStatusColor(rfq.status)}\`}>{rfq.status}</span>
                         {urgent && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold">Closing!</span>}
                         {closingSoon && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-semibold">Closing Soon</span>}
                         {quotaWarning && <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5"><Users size={10} /> {rfq._count.quotations}/3 quotes</span>}
@@ -142,7 +144,7 @@ export default function BuyerDashboard() {
                       <div className="text-right">
                         <p className="text-xs text-gray-400">{rfq._count.quotations} quote{rfq._count.quotations !== 1 ? 's' : ''}</p>
                         {rfq.status === 'OPEN' && (
-                          <p className={`text-xs font-medium ${urgent ? 'text-red-600' : 'text-orange-500'}`}>{timeUntilDeadline(rfq.submissionDeadline)}</p>
+                          <p className={\`text-xs font-medium \${urgent ? 'text-red-600' : 'text-orange-500'}\`}>{timeUntilDeadline(rfq.submissionDeadline)}</p>
                         )}
                       </div>
                       <ArrowRight size={16} className="text-gray-300" />
@@ -157,3 +159,7 @@ export default function BuyerDashboard() {
     </div>
   )
 }
+`
+
+fs.writeFileSync(path.join('C:\\', 'Users', 'MICHAELSALLAH', 'nrdpp', 'apps', 'web', 'src', 'app', 'buyer', 'dashboard', 'page.tsx'), content, 'utf8')
+console.log('Buyer dashboard written, lines:', content.split('\n').length)

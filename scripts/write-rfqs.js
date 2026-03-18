@@ -1,4 +1,6 @@
-'use client'
+const fs = require('fs'), path = require('path')
+
+const content = `'use client'
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
@@ -46,7 +48,7 @@ function MarketplaceContent() {
     setLoading(true)
     setPage(1)
     const q = new URLSearchParams({ status: 'OPEN', ...(search && { search }), ...(category && { category }) })
-    api.get<{ rfqs: Rfq[] }>(`/api/rfqs?${q}`)
+    api.get<{ rfqs: Rfq[] }>(\`/api/rfqs?\${q}\`)
       .then((r) => {
         let sorted = [...r.rfqs]
         if (sort === 'deadline_asc') sorted.sort((a, b) => new Date(a.submissionDeadline).getTime() - new Date(b.submissionDeadline).getTime())
@@ -137,7 +139,7 @@ function MarketplaceContent() {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
                           <span className="font-mono text-xs text-gray-400">{rfq.referenceNo}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rfqStatusColor(rfq.status)}`}>{rfq.status}</span>
+                          <span className={\`text-xs px-2 py-0.5 rounded-full font-medium \${rfqStatusColor(rfq.status)}\`}>{rfq.status}</span>
                           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{rfq.category.name}</span>
                           {urgent && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">Urgent</span>}
                           {closing && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Closing Soon</span>}
@@ -149,7 +151,7 @@ function MarketplaceContent() {
                             <Building2 size={13} />
                             <span>{rfq.entity.name}</span>
                           </div>
-                          <div className={`flex items-center gap-1.5 ${urgent ? 'text-red-500 font-medium' : ''}`}>
+                          <div className={\`flex items-center gap-1.5 \${urgent ? 'text-red-500 font-medium' : ''}\`}>
                             <Clock size={13} />
                             <span>{timeUntilDeadline(rfq.submissionDeadline)}</span>
                           </div>
@@ -183,7 +185,7 @@ function MarketplaceContent() {
                 <div className="flex gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                     <button key={p} onClick={() => setPage(p)}
-                      className={`w-9 h-9 text-sm rounded-lg font-medium transition-colors ${p === page ? 'bg-green-700 text-white' : 'border border-gray-300 hover:bg-gray-50 text-gray-600'}`}>
+                      className={\`w-9 h-9 text-sm rounded-lg font-medium transition-colors \${p === page ? 'bg-green-700 text-white' : 'border border-gray-300 hover:bg-gray-50 text-gray-600'}\`}>
                       {p}
                     </button>
                   ))}
@@ -212,3 +214,7 @@ export default function PublicMarketplacePage() {
     </Suspense>
   )
 }
+`
+
+fs.writeFileSync(path.join('C:\\', 'Users', 'MICHAELSALLAH', 'nrdpp', 'apps', 'web', 'src', 'app', 'rfqs', 'page.tsx'), content, 'utf8')
+console.log('RFQ marketplace written, lines:', content.split('\n').length)

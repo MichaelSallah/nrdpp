@@ -1,4 +1,6 @@
-'use client'
+const fs = require('fs'), path = require('path')
+
+const content = `'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { TopBar } from '@/components/layout/TopBar'
@@ -31,7 +33,7 @@ export default function SupplierDashboard() {
       setRfqs(r.rfqs)
       if (s.supplier) {
         setSupplier(s.supplier)
-        api.get<Compliance>(`/api/suppliers/${s.supplier.id}/compliance`).then(setCompliance)
+        api.get<Compliance>(\`/api/suppliers/\${s.supplier.id}/compliance\`).then(setCompliance)
         api.get<{ quotations: Array<{ status: string }> }>('/api/quotations/my').then((q) => {
           const total = q.quotations.length
           const awarded = q.quotations.filter((x) => x.status === 'AWARDED').length
@@ -54,7 +56,7 @@ export default function SupplierDashboard() {
 
         {/* Compliance Status Banner */}
         {supplier && (
-          <div className={`mb-6 rounded-xl border p-4 ${compliance?.compliant ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
+          <div className={\`mb-6 rounded-xl border p-4 \${compliance?.compliant ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}\`}>
             <div className="flex items-start gap-4">
               {compliance?.compliant
                 ? <CheckCircle2 className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
@@ -62,7 +64,7 @@ export default function SupplierDashboard() {
               <div className="flex-1">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <p className="font-semibold text-gray-900">{supplier.companyName}</p>
-                  <span className={`text-xs px-2 py-1 rounded-full font-semibold ${supplierStatusColor(supplier.status)}`}>{supplier.status}</span>
+                  <span className={\`text-xs px-2 py-1 rounded-full font-semibold \${supplierStatusColor(supplier.status)}\`}>{supplier.status}</span>
                 </div>
                 {compliance?.compliant ? (
                   <p className="text-sm text-green-700 mt-1">Your account is fully compliant and eligible to participate in RFQs.</p>
@@ -118,12 +120,12 @@ export default function SupplierDashboard() {
                 <div className="w-9 h-9 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center">
                   <ShieldCheck size={18} />
                 </div>
-                <span className={`text-xs font-semibold ${riskColor}`}>{riskLabel}</span>
+                <span className={\`text-xs font-semibold \${riskColor}\`}>{riskLabel}</span>
               </div>
-              <p className={`text-2xl font-bold ${riskColor}`}>{riskScore}</p>
+              <p className={\`text-2xl font-bold \${riskColor}\`}>{riskScore}</p>
               <p className="text-xs text-gray-500 mt-0.5 mb-2">Risk Score</p>
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-full ${riskBg} rounded-full transition-all`} style={{ width: riskScore + '%' }} />
+                <div className={\`h-full \${riskBg} rounded-full transition-all\`} style={{ width: riskScore + '%' }} />
               </div>
             </div>
           </div>
@@ -151,7 +153,7 @@ export default function SupplierDashboard() {
                 const urgent = hoursLeft < 24
                 const closing = hoursLeft < 48 && hoursLeft >= 24
                 return (
-                  <Link key={rfq.id} href={`/supplier/rfqs/${rfq.id}`} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                  <Link key={rfq.id} href={\`/supplier/rfqs/\${rfq.id}\`} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="font-medium text-gray-900 truncate">{rfq.title}</p>
@@ -167,7 +169,7 @@ export default function SupplierDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 ml-4 shrink-0">
-                      <p className={`text-xs font-medium ${urgent ? 'text-red-600' : 'text-orange-500'}`}>{timeUntilDeadline(rfq.submissionDeadline)}</p>
+                      <p className={\`text-xs font-medium \${urgent ? 'text-red-600' : 'text-orange-500'}\`}>{timeUntilDeadline(rfq.submissionDeadline)}</p>
                       <ArrowRight size={16} className="text-gray-300" />
                     </div>
                   </Link>
@@ -180,3 +182,7 @@ export default function SupplierDashboard() {
     </div>
   )
 }
+`
+
+fs.writeFileSync(path.join('C:\\', 'Users', 'MICHAELSALLAH', 'nrdpp', 'apps', 'web', 'src', 'app', 'supplier', 'dashboard', 'page.tsx'), content, 'utf8')
+console.log('Supplier dashboard written, lines:', content.split('\n').length)
