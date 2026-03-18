@@ -1,25 +1,11 @@
 import Link from 'next/link'
 import { ArrowRight, Shield, BarChart3, Bell, FileText, Users, Clock } from 'lucide-react'
+import { PublicNav } from '@/components/layout/PublicNav'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-700">
-      {/* Header */}
-      <header className="border-b border-green-700 bg-green-900/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-green-900 font-bold text-sm">GH</div>
-            <div>
-              <p className="text-white font-bold text-sm leading-tight">NRDPP</p>
-              <p className="text-green-300 text-xs">National RFQ Digital Procurement Platform</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-green-200 hover:text-white text-sm transition-colors">Login</Link>
-            <Link href="/register" className="bg-yellow-400 text-green-900 px-4 py-2 rounded-md text-sm font-medium hover:bg-yellow-300 transition-colors">Register</Link>
-          </div>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">

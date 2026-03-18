@@ -4,6 +4,7 @@ import { api } from '@/lib/api'
 import { rfqStatusColor, timeUntilDeadline, formatCurrency, formatDate } from '@/lib/utils'
 import { Search, Clock, FileText, Building2 } from 'lucide-react'
 import Link from 'next/link'
+import { PublicNav } from '@/components/layout/PublicNav'
 
 interface Rfq {
   id: string; referenceNo: string; title: string; description: string
@@ -28,25 +29,13 @@ export default function PublicMarketplacePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-green-800 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center">
-              <span className="text-xs font-bold text-green-900">GH</span>
-            </div>
-            <span className="font-bold text-lg">NRDPP</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-green-200 hover:text-white">Login</Link>
-            <Link href="/register" className="bg-yellow-400 text-green-900 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-300">Register</Link>
-          </div>
-        </div>
-        <div className="max-w-6xl mx-auto px-6 pb-8 pt-2">
+      <PublicNav />
+      <div className="bg-green-800 text-white">
+        <div className="max-w-6xl mx-auto px-6 py-6">
           <h1 className="text-2xl font-bold mb-1">Open RFQ Marketplace</h1>
           <p className="text-green-200 text-sm">Browse and respond to active procurement requests from public and private sector organisations</p>
         </div>
-      </header>
+      </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Search */}
