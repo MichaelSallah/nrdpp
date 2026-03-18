@@ -1,0 +1,434 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  BUYER
+  SUPPLIER
+}
+
+enum SupplierStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DEBARRED
+}
+
+enum DocumentType {
+  BUSINESS_REGISTRATION
+  TAX_CLEARANCE
+  SSNIT_CLEARANCE
+  COMPANY_CERTIFICATE
+  ISO_CERTIFICATION
+  OTHER
+}
+
+enum RfqStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  AWARDED
+  CANCELLED
+}
+
+enum RfqCategory {
+  GOODS
+  WORKS
+  SERVICES
+}
+
+enum InvitationStatus {
+  INVITED
+  VIEWED
+  SUBMITTED
+  DECLINED
+}
+
+enum QuotationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum NotificationType {
+  RFQ_INVITATION
+  RFQ_DEADLINE_REMINDER
+  RFQ_AWARDED
+  RFQ_CLOSED
+  COMPLIANCE_ALERT
+  DOCUMENT_EXPIRY
+  QUOTATION_RECEIVED
+  EVALUATION_PENDING
+  ESCALATION
+  GENERAL
+}
+
+// ─────────────────────────────────────────────
+// Users & Auth
+// ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  phone         String?
+  role          Role
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  entity        Entity?   @relation(fields: [entityId], references: [id])
+  entityId      String?
+
+  supplier      Supplier?
+
+  notifications Notification[]
+  chatMessages  ChatMessage[]
+  auditLogs     AuditLog[]    @relation("ActorLogs")
+  evaluations   Evaluation[]
+  awards        Award[]       @relation("AwardedBy")
+  createdRfqs   Rfq[]         @relation("CreatedBy")
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// Entities (Buying Institutions)
+// ─────────────────────────────────────────────
+
+model Entity {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  region    String
+  type      String   // Ministry, Agency, Company, NGO, etc.
+  address   String?
+  phone     String?
+  email     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  rfqs      Rfq[]
+}
+
+// ─────────────────────────────────────────────
+// Suppliers
+// ─────────────────────────────────────────────
+
+model Supplier {
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  user             User           @relation(fields: [userId], references: [id])
+
+  companyName      String
+  registrationNo   String         @unique
+  taxId            String         @unique
+  ssnitNo          String?
+  procurementRegNo String?
+  businessType     String
+  yearEstablished  Int?
+  address          String
+  city             String
+  region           String
+  country          String         @default("Ghana")
+  website          String?
+  description      String?
+
+  status           SupplierStatus @default(PENDING)
+  riskScore        Float          @default(0)
+  complianceNotes  String?
+
+  verifiedAt       DateTime?
+  verifiedBy       String?
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  documents        SupplierDocument[]
+  categories       SupplierCategory[]
+  rfqInvitations   RfqSupplier[]
+  quotations       Quotation[]
+  evaluations      Evaluation[]
+  awards           Award[]
+}
+
+model SupplierDocument {
+  id          String       @id @default(cuid())
+  supplierId  String
+  supplier    Supplier     @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  type        DocumentType
+  fileUrl     String
+  fileName    String
+  fileSize    Int
+  expiryDate  DateTime?
+  verified    Boolean      @default(false)
+  verifiedAt  DateTime?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// Categories
+// ─────────────────────────────────────────────
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  code        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("Subcategories", fields: [parentId], references: [id])
+  children    Category[] @relation("Subcategories")
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+
+  supplierCategories SupplierCategory[]
+  rfqs               Rfq[]
+}
+
+model SupplierCategory {
+  supplierId  String
+  supplier    Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([supplierId, categoryId])
+}
+
+// ─────────────────────────────────────────────
+// RFQs
+// ─────────────────────────────────────────────
+
+model Rfq {
+  id                  String      @id @default(cuid())
+  referenceNo         String      @unique
+  title               String
+  description         String
+  type                RfqCategory
+  categoryId          String
+  category            Category    @relation(fields: [categoryId], references: [id])
+  entityId            String
+  entity              Entity      @relation(fields: [entityId], references: [id])
+  createdById         String
+  createdBy           User        @relation("CreatedBy", fields: [createdById], references: [id])
+
+  status              RfqStatus   @default(DRAFT)
+  budgetEstimate      Decimal?    @db.Decimal(18, 2)
+  currency            String      @default("GHS")
+  submissionDeadline  DateTime
+  deliveryTimeline    String?
+  evaluationCriteria  String?
+  termsConditions     String?
+
+  minimumQuotations   Int         @default(3)
+  publishedAt         DateTime?
+  closedAt            DateTime?
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  items               RfqItem[]
+  suppliers           RfqSupplier[]
+  quotations          Quotation[]
+  chatMessages        ChatMessage[]
+  evaluations         Evaluation[]
+  award               Award?
+  auditLogs           AuditLog[]  @relation("RfqLogs")
+}
+
+model RfqItem {
+  id           String  @id @default(cuid())
+  rfqId        String
+  rfq          Rfq     @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  itemNo       Int
+  description  String
+  unit         String
+  quantity     Decimal @db.Decimal(12, 4)
+  specifications String?
+
+  quotationItems QuotationItem[]
+}
+
+model RfqSupplier {
+  rfqId      String
+  rfq        Rfq              @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  supplierId String
+  supplier   Supplier         @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  status     InvitationStatus @default(INVITED)
+  invitedAt  DateTime         @default(now())
+  viewedAt   DateTime?
+  optedIn    Boolean          @default(false)
+
+  @@id([rfqId, supplierId])
+}
+
+// ─────────────────────────────────────────────
+// Quotations
+// ─────────────────────────────────────────────
+
+model Quotation {
+  id            String          @id @default(cuid())
+  rfqId         String
+  rfq           Rfq             @relation(fields: [rfqId], references: [id])
+  supplierId    String
+  supplier      Supplier        @relation(fields: [supplierId], references: [id])
+  status        QuotationStatus @default(SUBMITTED)
+
+  totalAmount   Decimal         @db.Decimal(18, 2)
+  currency      String          @default("GHS")
+  vatAmount     Decimal?        @db.Decimal(18, 2)
+  deliveryDays  Int?
+  validityDays  Int             @default(30)
+  notes         String?
+
+  submittedAt   DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  items         QuotationItem[]
+  evaluation    Evaluation?
+  award         Award?
+
+  @@unique([rfqId, supplierId])
+}
+
+model QuotationItem {
+  id           String    @id @default(cuid())
+  quotationId  String
+  quotation    Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  rfqItemId    String
+  rfqItem      RfqItem   @relation(fields: [rfqItemId], references: [id])
+  unitPrice    Decimal   @db.Decimal(18, 4)
+  totalPrice   Decimal   @db.Decimal(18, 2)
+  notes        String?
+}
+
+// ─────────────────────────────────────────────
+// Chatroom
+// ─────────────────────────────────────────────
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  rfqId      String
+  rfq        Rfq      @relation(fields: [rfqId], references: [id])
+  senderId   String
+  sender     User     @relation(fields: [senderId], references: [id])
+  message    String
+  isSystem   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// Evaluation & Award
+// ─────────────────────────────────────────────
+
+model Evaluation {
+  id             String    @id @default(cuid())
+  rfqId          String
+  rfq            Rfq       @relation(fields: [rfqId], references: [id])
+  supplierId     String
+  supplier       Supplier  @relation(fields: [supplierId], references: [id])
+  quotationId    String    @unique
+  quotation      Quotation @relation(fields: [quotationId], references: [id])
+  evaluatorId    String
+  evaluator      User      @relation(fields: [evaluatorId], references: [id])
+
+  priceScore     Float     @default(0)     // 0-40
+  technicalScore Float     @default(0)     // 0-40
+  deliveryScore  Float     @default(0)     // 0-20
+  totalScore     Float     @default(0)     // 0-100
+
+  priceRank      Int?
+  recommendation String?
+  notes          String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([rfqId, supplierId])
+}
+
+model Award {
+  id            String    @id @default(cuid())
+  rfqId         String    @unique
+  rfq           Rfq       @relation(fields: [rfqId], references: [id])
+  supplierId    String
+  supplier      Supplier  @relation(fields: [supplierId], references: [id])
+  quotationId   String    @unique
+  quotation     Quotation @relation(fields: [quotationId], references: [id])
+  awardedById   String
+  awardedBy     User      @relation("AwardedBy", fields: [awardedById], references: [id])
+
+  awardAmount   Decimal   @db.Decimal(18, 2)
+  currency      String    @default("GHS")
+  justification String
+  awardDate     DateTime  @default(now())
+  letterSent    Boolean   @default(false)
+
+  createdAt     DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────
+// Audit Trail
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  entityType  String   // rfq, supplier, quotation, award, user
+  entityId    String
+  action      String   // created, updated, published, submitted, evaluated, awarded, etc.
+  actorId     String?
+  actor       User?    @relation("ActorLogs", fields: [actorId], references: [id])
+  metadata    Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  rfq         Rfq?     @relation("RfqLogs", fields: [rfqId], references: [id])
+  rfqId       String?
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  metadata  Json?
+  read      Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+}

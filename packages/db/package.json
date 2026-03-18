@@ -1,0 +1,20 @@
+{
+  "name": "@nrdpp/db",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "seed": "ts-node --esm prisma/seed.ts",
+    "studio": "prisma studio",
+    "deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
