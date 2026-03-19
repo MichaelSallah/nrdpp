@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
-import { Loader2, Eye, EyeOff, Building2, Truck, Shield } from 'lucide-react'
+import { Loader2, Eye, EyeOff, Building2, Truck } from 'lucide-react'
 import { PublicNav } from '@/components/layout/PublicNav'
 import { cn } from '@/lib/utils'
 
@@ -17,7 +17,7 @@ const schema = z.object({
 })
 type FormData = z.infer<typeof schema>
 
-type PortalRole = 'BUYER' | 'SUPPLIER' | 'ADMIN'
+type PortalRole = 'BUYER' | 'SUPPLIER'
 
 const portals: { role: PortalRole; label: string; icon: React.ElementType; desc: string; placeholder: string }[] = [
   {
@@ -33,13 +33,6 @@ const portals: { role: PortalRole; label: string; icon: React.ElementType; desc:
     icon: Truck,
     desc: 'Sign in to browse open RFQs and submit your quotations.',
     placeholder: 'info@yourcompany.com',
-  },
-  {
-    role: 'ADMIN',
-    label: 'Admin',
-    icon: Shield,
-    desc: 'Platform administrator access for managing entities and users.',
-    placeholder: 'admin@nrdpp.gov',
   },
 ]
 
@@ -58,10 +51,12 @@ export default function LoginPage() {
     setError('')
     try {
       const res = await api.post<{ user: { id: string; email: string; firstName: string; lastName: string; role: 'ADMIN' | 'BUYER' | 'SUPPLIER'; entityId?: string; supplierId?: string }; accessToken: string; refreshToken: string }>('/api/auth/login', data)
+      if (res.user.role === 'ADMIN') {
+        setError('Admin access is not available here. Please use the Admin Portal.')
+        return
+      }
       setAuth(res.user, res.accessToken, res.refreshToken)
-      const role = res.user.role
-      if (role === 'ADMIN') router.push('/admin/dashboard')
-      else if (role === 'BUYER') router.push('/buyer/dashboard')
+      if (res.user.role === 'BUYER') router.push('/buyer/dashboard')
       else router.push('/supplier/dashboard')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Invalid email or password')
@@ -83,7 +78,7 @@ export default function LoginPage() {
           </div>
 
           {/* Portal selector */}
-          <div className="grid grid-cols-3 gap-2 mb-5">
+          <div className="grid grid-cols-2 gap-2 mb-5">
             {portals.map(({ role, label, icon: Icon }) => (
               <button
                 key={role}
@@ -158,14 +153,12 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {portal !== 'ADMIN' && (
-              <p className="text-center text-sm text-gray-600 mt-5">
-                No account?{' '}
-                <Link href={`/register?role=${portal}`} className="text-green-700 font-medium hover:underline">
-                  Register as {activePortal.label}
-                </Link>
-              </p>
-            )}
+            <p className="text-center text-sm text-gray-600 mt-5">
+              No account?{' '}
+              <Link href={`/register?role=${portal}`} className="text-green-700 font-medium hover:underline">
+                Register as {activePortal.label}
+              </Link>
+            </p>
           </div>
 
           <p className="text-center text-green-400 text-xs mt-5">
