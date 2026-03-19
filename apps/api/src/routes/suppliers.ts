@@ -226,18 +226,31 @@ supplierRoutes.get('/:id/compliance', authenticate, async (req, res) => {
 
   const supplier = supplierWithDocs
   const today = new Date()
+  const soonThreshold = new Date(today.getTime() + 30 * 86_400_000)
   const issues: string[] = []
+  const warnings: string[] = []
 
-  const docTypes = supplier.documents.map((d: { type: DocumentType }) => d.type)
-  if (!docTypes.includes(DocumentType.BUSINESS_REGISTRATION)) issues.push('Business Registration missing')
-  if (!docTypes.includes(DocumentType.TAX_CLEARANCE)) issues.push('Tax Clearance Certificate missing')
-  if (!docTypes.includes(DocumentType.SSNIT_CLEARANCE)) issues.push('SSNIT Clearance missing')
+  const REQUIRED = [
+    { type: DocumentType.BUSINESS_REGISTRATION, label: 'Business Registration Documents' },
+    { type: DocumentType.VAT_REGISTRATION,      label: 'VAT Registration Certificate' },
+    { type: DocumentType.TAX_CLEARANCE,         label: 'Tax Clearance Certificate' },
+    { type: DocumentType.SSNIT_CLEARANCE,       label: 'SSNIT Clearance Certificate' },
+    { type: DocumentType.PPA_REGISTRATION,      label: 'PPA Registration' },
+  ]
 
-  supplier.documents.forEach((doc: { type: DocumentType; expiryDate: Date | null }) => {
-    if (doc.expiryDate && doc.expiryDate < today) {
-      issues.push(`${doc.type.replace(/_/g, ' ')} expired on ${doc.expiryDate.toLocaleDateString()}`)
+  for (const { type, label } of REQUIRED) {
+    const doc = supplier.documents.find((d: { type: DocumentType }) => d.type === type)
+    if (!doc) {
+      issues.push(`${label} — missing`)
+    } else {
+      const d = doc as { type: DocumentType; expiryDate: Date | null }
+      if (d.expiryDate && d.expiryDate < today) {
+        issues.push(`${label} — expired on ${d.expiryDate.toLocaleDateString()}`)
+      } else if (d.expiryDate && d.expiryDate < soonThreshold) {
+        warnings.push(`${label} — expires on ${d.expiryDate.toLocaleDateString()}`)
+      }
     }
-  })
+  }
 
   res.json({
     success: true,
@@ -245,6 +258,8 @@ supplierRoutes.get('/:id/compliance', authenticate, async (req, res) => {
     status: supplier.status,
     riskScore: supplier.riskScore,
     compliant: issues.length === 0,
+    canBid: issues.length === 0,
     issues,
+    warnings,
   })
 })

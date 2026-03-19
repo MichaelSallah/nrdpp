@@ -5,7 +5,23 @@ import { authenticate, authorize } from '../middleware/auth'
 import { AppError } from '../middleware/errorHandler'
 import { logAudit } from '../middleware/auditLogger'
 import { createNotification } from '../services/notificationService'
-import { NotificationType, Role, RfqStatus } from '@prisma/client'
+import { DocumentType, NotificationType, Role, RfqStatus } from '@prisma/client'
+
+const REQUIRED_DOC_TYPES: DocumentType[] = [
+  DocumentType.BUSINESS_REGISTRATION,
+  DocumentType.VAT_REGISTRATION,
+  DocumentType.TAX_CLEARANCE,
+  DocumentType.SSNIT_CLEARANCE,
+  DocumentType.PPA_REGISTRATION,
+]
+
+const DOC_LABELS: Record<string, string> = {
+  BUSINESS_REGISTRATION: 'Business Registration Documents',
+  VAT_REGISTRATION:      'VAT Registration Certificate',
+  TAX_CLEARANCE:         'Tax Clearance Certificate',
+  SSNIT_CLEARANCE:       'SSNIT Clearance Certificate',
+  PPA_REGISTRATION:      'PPA Registration',
+}
 
 export const quotationRoutes = Router()
 
@@ -37,6 +53,22 @@ quotationRoutes.post('/:id/quotations', authenticate, authorize(Role.SUPPLIER), 
 
   const supplier = await prisma.supplier.findUnique({ where: { id: supplierId } })
   if (!supplier || supplier.status !== 'ACTIVE') throw new AppError('Supplier account not active', 403)
+
+  // ── Document compliance check ──
+  const supplierDocs = await prisma.supplierDocument.findMany({
+    where: { supplierId, type: { in: REQUIRED_DOC_TYPES } },
+    orderBy: { createdAt: 'desc' },
+  })
+  const now = new Date()
+  for (const docType of REQUIRED_DOC_TYPES) {
+    const doc = supplierDocs.find((d) => d.type === docType)
+    if (!doc) {
+      throw new AppError(`Cannot bid: missing required document — ${DOC_LABELS[docType]}`, 403)
+    }
+    if (doc.expiryDate && doc.expiryDate < now) {
+      throw new AppError(`Cannot bid: expired document — ${DOC_LABELS[docType]} (expired ${doc.expiryDate.toLocaleDateString()})`, 403)
+    }
+  }
 
   const data = submitSchema.parse(req.body)
 

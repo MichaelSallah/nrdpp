@@ -14,7 +14,7 @@ interface Rfq {
   _count: { quotations: number }
 }
 interface Supplier { id: string; companyName: string; status: string; riskScore: number }
-interface Compliance { compliant: boolean; issues: string[] }
+interface Compliance { compliant: boolean; canBid: boolean; issues: string[]; warnings: string[] }
 interface QuotationStats { total: number; awarded: number; pending: number }
 
 export default function SupplierDashboard() {
@@ -64,28 +64,37 @@ export default function SupplierDashboard() {
           </div>
         )}
 
-        {/* Compliance Status Banner */}
+        {/* Compliance & Document Status Banner */}
         {supplier && supplier.status !== 'PENDING' && (
-          <div className={`mb-6 rounded-xl border p-4 ${compliance?.compliant ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
+          <div className={`mb-6 rounded-xl border p-4 ${compliance?.canBid === false ? 'bg-red-50 border-red-200' : compliance?.warnings?.length ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
             <div className="flex items-start gap-4">
-              {compliance?.compliant
-                ? <CheckCircle2 className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
-                : <AlertTriangle className="text-yellow-600 flex-shrink-0 mt-0.5" size={20} />}
+              {compliance?.canBid === false
+                ? <AlertTriangle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+                : compliance?.warnings?.length
+                  ? <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
+                  : <CheckCircle2 className="text-green-600 flex-shrink-0 mt-0.5" size={20} />}
               <div className="flex-1">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <p className="font-semibold text-gray-900">{supplier.companyName}</p>
                   <span className={`text-xs px-2 py-1 rounded-full font-semibold ${supplierStatusColor(supplier.status)}`}>{supplier.status}</span>
                 </div>
-                {compliance?.compliant ? (
-                  <p className="text-sm text-green-700 mt-1">Your account is fully compliant and eligible to participate in RFQs.</p>
-                ) : (
+                {compliance?.canBid === false ? (
                   <div className="mt-1">
-                    <p className="text-sm text-yellow-700 font-medium">Compliance issues found:</p>
-                    <ul className="list-disc list-inside text-sm text-yellow-700 mt-1 space-y-0.5">
-                      {compliance?.issues.map((issue) => <li key={issue}>{issue}</li>)}
+                    <p className="text-sm text-red-700 font-semibold">⛔ Bidding blocked — document issues must be resolved:</p>
+                    <ul className="list-disc list-inside text-sm text-red-700 mt-1 space-y-0.5">
+                      {compliance.issues.map((issue) => <li key={issue}>{issue}</li>)}
                     </ul>
-                    <Link href="/supplier/profile" className="text-sm font-medium text-yellow-800 hover:underline mt-2 inline-block">Update your documents →</Link>
+                    <p className="text-xs text-red-600 mt-2">Contact your administrator to upload or renew the required documents.</p>
                   </div>
+                ) : compliance?.warnings?.length ? (
+                  <div className="mt-1">
+                    <p className="text-sm text-amber-700 font-medium">⚠ Documents expiring soon — renew before they expire to keep bidding:</p>
+                    <ul className="list-disc list-inside text-sm text-amber-700 mt-1 space-y-0.5">
+                      {compliance.warnings.map((w) => <li key={w}>{w}</li>)}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="text-sm text-green-700 mt-1">All required documents are valid. You are eligible to submit quotations.</p>
                 )}
               </div>
             </div>

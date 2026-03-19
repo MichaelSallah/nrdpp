@@ -1,4 +1,6 @@
-'use client'
+const fs = require('fs'), path = require('path')
+
+const content = `'use client'
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AdminNav } from '@/components/layout/AdminNav'
@@ -80,7 +82,7 @@ export default function AdminSupplierDetailPage() {
 
   const load = () => {
     setLoading(true)
-    api.get<{ supplier: Supplier }>(`/api/admin/suppliers/${id}`)
+    api.get<{ supplier: Supplier }>(\`/api/admin/suppliers/\${id}\`)
       .then((r) => setSupplier(r.supplier))
       .catch(() => setError('Failed to load supplier'))
       .finally(() => setLoading(false))
@@ -91,8 +93,8 @@ export default function AdminSupplierDetailPage() {
   const changeStatus = async (newStatus: string) => {
     setActionLoading(newStatus); setError(''); setSuccess('')
     try {
-      await api.patch(`/api/suppliers/${id}/status`, { status: newStatus })
-      setSuccess(newStatus === 'ACTIVE' ? 'Supplier approved and activated.' : `Supplier ${newStatus.toLowerCase()}.`)
+      await api.patch(\`/api/suppliers/\${id}/status\`, { status: newStatus })
+      setSuccess(newStatus === 'ACTIVE' ? 'Supplier approved and activated.' : \`Supplier \${newStatus.toLowerCase()}.\`)
       load()
     } catch { setError('Failed to update status') }
     finally { setActionLoading(null) }
@@ -109,9 +111,9 @@ export default function AdminSupplierDetailPage() {
       form.append('expiryDate', expiryDate)
       const BASE = process.env.NEXT_PUBLIC_API_URL || ''
       const token = typeof window !== 'undefined' ? localStorage.getItem('admin_access_token') : null
-      const res = await fetch(`${BASE}/api/admin/suppliers/${id}/documents`, {
+      const res = await fetch(\`\${BASE}/api/admin/suppliers/\${id}/documents\`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: token ? { Authorization: \`Bearer \${token}\` } : {},
         body: form,
       })
       if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed') }
@@ -126,7 +128,7 @@ export default function AdminSupplierDetailPage() {
     if (!confirm('Delete this document?')) return
     setError(''); setSuccess('')
     try {
-      await api.del(`/api/admin/suppliers/${id}/documents/${docId}`)
+      await api.del(\`/api/admin/suppliers/\${id}/documents/\${docId}\`)
       setSuccess('Document removed.')
       load()
     } catch { setError('Failed to delete document') }
@@ -216,7 +218,7 @@ export default function AdminSupplierDetailPage() {
             <div>
               <div className="flex items-center gap-3 mb-1 flex-wrap">
                 <h1 className="text-xl font-bold text-gray-900">{supplier.companyName}</h1>
-                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${supplierStatusColor(supplier.status)}`}>{supplier.status}</span>
+                <span className={\`text-xs px-2.5 py-1 rounded-full font-semibold \${supplierStatusColor(supplier.status)}\`}>{supplier.status}</span>
                 {supplier.status === 'PENDING' && (
                   <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold animate-pulse">Awaiting Approval</span>
                 )}
@@ -319,14 +321,14 @@ export default function AdminSupplierDetailPage() {
                         : <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
 
                   return (
-                    <div key={type} className={`border rounded-xl p-4 ${borderCls}`}>
+                    <div key={type} className={\`border rounded-xl p-4 \${borderCls}\`}>
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <div className="flex items-start gap-2.5">
                           {iconEl}
                           <div>
                             <p className="text-sm font-medium text-gray-900">{label}</p>
                             <p className="text-xs text-gray-400 mt-0.5">
-                              {anyExpired ? 'Document expired — supplier cannot bid' : anyExpiring ? 'Expiring soon — renew urgently' : hasDoc ? `${docs.length} file(s) uploaded` : 'No document uploaded yet'}
+                              {anyExpired ? 'Document expired — supplier cannot bid' : anyExpiring ? 'Expiring soon — renew urgently' : hasDoc ? \`\${docs.length} file(s) uploaded\` : 'No document uploaded yet'}
                             </p>
                           </div>
                         </div>
@@ -358,7 +360,7 @@ export default function AdminSupplierDetailPage() {
                             const es = expiryStatus(doc)
                             const rowBorder = es === 'expired' ? 'border-red-200 bg-red-50' : es === 'expiring' ? 'border-amber-200 bg-amber-50' : 'border-gray-200 bg-white'
                             return (
-                              <div key={doc.id} className={`flex items-center justify-between gap-2 border rounded-lg px-3 py-2 ${rowBorder}`}>
+                              <div key={doc.id} className={\`flex items-center justify-between gap-2 border rounded-lg px-3 py-2 \${rowBorder}\`}>
                                 <div className="flex items-center gap-2 min-w-0">
                                   <FileText size={14} className="text-gray-400 shrink-0" />
                                   <div className="min-w-0">
@@ -396,3 +398,9 @@ export default function AdminSupplierDetailPage() {
     </div>
   )
 }
+`
+
+const outPath = path.join('C:\\', 'Users', 'MICHAELSALLAH', 'nrdpp', 'apps', 'admin', 'src', 'app', 'suppliers', '[id]', 'page.tsx')
+fs.mkdirSync(path.dirname(outPath), { recursive: true })
+fs.writeFileSync(outPath, content, 'utf8')
+console.log('Admin supplier detail v2 written, lines:', content.split('\n').length)
