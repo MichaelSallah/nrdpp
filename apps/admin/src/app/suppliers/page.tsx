@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react'
 import { AdminNav } from '@/components/layout/AdminNav'
 import { api } from '@/lib/api'
 import { supplierStatusColor, formatDate } from '@/lib/utils'
-import { Search, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
+import { Search, CheckCircle2, XCircle, AlertTriangle, Eye } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
+import Link from 'next/link'
 
 interface Supplier {
   id: string; companyName: string; registrationNo: string; status: string
@@ -96,6 +97,10 @@ function SuppliersContent() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <Link href={`/suppliers/${s.id}`}
+                      className="flex items-center gap-1.5 border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50">
+                      <Eye size={13} /> View
+                    </Link>
                     {s.status === 'PENDING' && (
                       <>
                         <button onClick={() => changeStatus(s.id, 'ACTIVE')} disabled={actionLoading === s.id}
