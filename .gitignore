@@ -13,8 +13,13 @@ apps/api/.env
 apps/web/.env*
 
 # Next.js build output
+.next/
 apps/web/.next/
 apps/web/out/
+apps/admin/.next/
+
+# Uploaded files
+uploads/
 
 # Build artifacts
 dist/

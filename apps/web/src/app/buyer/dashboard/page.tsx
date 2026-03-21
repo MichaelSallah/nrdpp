@@ -97,7 +97,7 @@ export default function BuyerDashboard() {
         <div className="bg-white rounded-xl border border-gray-200">
           <div className="p-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-semibold text-gray-900">My Recent RFQs</h3>
-            <Link href="/buyer/rfqs" className="text-sm text-green-700 font-medium flex items-center gap-1 hover:underline">
+            <Link href="/buyer/rfqs" className="text-sm text-blue-700 font-medium flex items-center gap-1 hover:underline">
               View all <ArrowRight size={14} />
             </Link>
           </div>
@@ -108,7 +108,7 @@ export default function BuyerDashboard() {
             <div className="p-8 text-center">
               <BarChart3 size={40} className="text-gray-200 mx-auto mb-3" />
               <p className="text-gray-500">No RFQs yet.</p>
-              <Link href="/buyer/rfqs/create" className="mt-3 inline-flex items-center gap-1.5 text-sm text-green-700 font-medium hover:underline">
+              <Link href="/buyer/rfqs/create" className="mt-3 inline-flex items-center gap-1.5 text-sm text-blue-700 font-medium hover:underline">
                 <Plus size={14} /> Create your first RFQ
               </Link>
             </div>

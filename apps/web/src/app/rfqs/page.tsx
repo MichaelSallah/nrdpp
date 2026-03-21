@@ -13,7 +13,7 @@ interface Rfq {
   status: string; budget: number | null; currency: string
   submissionDeadline: string; createdAt: string
   category: { name: string; code: string }
-  entity: { name: string; code: string }
+  entity: { name: string; code: string; sector?: string }
   _count: { quotations: number; suppliers: number }
 }
 
@@ -64,10 +64,10 @@ function MarketplaceContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <PublicNav />
-      <div className="bg-green-800 text-white">
+      <div className="bg-blue-800 text-white">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <h1 className="text-2xl font-bold mb-1">Open RFQ Marketplace</h1>
-          <p className="text-green-200 text-sm">Browse and respond to active procurement requests from public and private sector organisations</p>
+          <p className="text-blue-200 text-sm">Browse and respond to active procurement requests from public and private sector organisations</p>
         </div>
       </div>
 
@@ -84,16 +84,16 @@ function MarketplaceContent() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search RFQs..."
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <select value={category} onChange={(e) => setCategory(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">All Categories</option>
               {categories.map((c) => <option key={c.id} value={c.code}>{c.name}</option>)}
             </select>
             <select value={sort} onChange={(e) => setSort(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
@@ -147,6 +147,9 @@ function MarketplaceContent() {
                           <div className="flex items-center gap-1.5">
                             <Building2 size={13} />
                             <span>{rfq.entity.name}</span>
+                            <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${rfq.entity.sector === 'PRIVATE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {rfq.entity.sector === 'PRIVATE' ? 'Private' : 'Gov'}
+                            </span>
                           </div>
                           {rfq.budget && <span>Budget: {formatCurrency(rfq.budget)}</span>}
                           <span>{rfq._count.suppliers} invited · {rfq._count.quotations} quotes</span>
@@ -178,7 +181,7 @@ function MarketplaceContent() {
                 <div className="flex gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                     <button key={p} onClick={() => setPage(p)}
-                      className={`w-9 h-9 text-sm rounded-lg font-medium transition-colors ${p === page ? 'bg-green-700 text-white' : 'border border-gray-300 hover:bg-gray-50 text-gray-600'}`}>
+                      className={`w-9 h-9 text-sm rounded-lg font-medium transition-colors ${p === page ? 'bg-blue-700 text-white' : 'border border-gray-300 hover:bg-gray-50 text-gray-600'}`}>
                       {p}
                     </button>
                   ))}

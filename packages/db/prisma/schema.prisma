@@ -63,6 +63,12 @@ enum QuotationStatus {
   REJECTED
 }
 
+enum TeamRole {
+  OWNER
+  MANAGER
+  VIEWER
+}
+
 enum NotificationType {
   RFQ_INVITATION
   RFQ_DEADLINE_REMINDER
@@ -89,6 +95,7 @@ model User {
   lastName      String
   phone         String?
   role          Role
+  teamRole      TeamRole  @default(OWNER)
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -97,6 +104,11 @@ model User {
   entityId      String?
 
   supplier      Supplier?
+
+  // Team membership: for invited team members, points to the owner who invited them
+  invitedById   String?
+  invitedBy     User?     @relation("TeamInvites", fields: [invitedById], references: [id])
+  teamMembers   User[]    @relation("TeamInvites")
 
   notifications Notification[]
   chatMessages  ChatMessage[]
@@ -121,17 +133,22 @@ model RefreshToken {
 // ─────────────────────────────────────────────
 
 model Entity {
-  id        String   @id @default(cuid())
-  name      String
-  code      String   @unique
-  region    String
-  type      String   // Ministry, Agency, Company, NGO, etc.
-  address   String?
-  phone     String?
-  email     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  code           String   @unique
+  region         String
+  type           String   // Ministry, Agency, Company, NGO, etc.
+  sector         String   @default("GOVERNMENT") // GOVERNMENT or PRIVATE
+  address        String?
+  digitalAddress String?  // GhanaPostGPS address
+  phone          String?
+  email          String?
+  website        String?
+  headOfEntity   String?  // Name of head (Minister, CEO, etc.)
+  headTitle      String?  // Title/position of head
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   users     User[]
   rfqs      Rfq[]
@@ -302,12 +319,20 @@ model Quotation {
   supplier      Supplier        @relation(fields: [supplierId], references: [id])
   status        QuotationStatus @default(SUBMITTED)
 
-  totalAmount   Decimal         @db.Decimal(18, 2)
-  currency      String          @default("GHS")
-  vatAmount     Decimal?        @db.Decimal(18, 2)
-  deliveryDays  Int?
-  validityDays  Int             @default(30)
-  notes         String?
+  totalAmount      Decimal         @db.Decimal(18, 2) // Subtotal (sum of line items)
+  currency         String          @default("GHS")
+
+  // ── Ghana Tax Breakdown ──
+  taxMode          String          @default("AUTO")   // AUTO = system-calculated, MANUAL = supplier-entered
+  vatAmount        Decimal?        @db.Decimal(18, 2) // VAT 15% (Act 870)
+  nhilAmount       Decimal?        @db.Decimal(18, 2) // NHIL 2.5% (Act 852)
+  getfundAmount    Decimal?        @db.Decimal(18, 2) // GETFund 2.5% (Act 581)
+  totalTax         Decimal?        @db.Decimal(18, 2) // Sum of all taxes
+  grandTotal       Decimal?        @db.Decimal(18, 2) // Subtotal + totalTax
+
+  deliveryDays     Int?
+  validityDays     Int             @default(30)
+  notes            String?
 
   submittedAt   DateTime        @default(now())
   updatedAt     DateTime        @updatedAt

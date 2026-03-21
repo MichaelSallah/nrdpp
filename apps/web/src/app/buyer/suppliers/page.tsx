@@ -52,13 +52,13 @@ export default function BuyerSuppliersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by company name or registration number..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Statuses</option>
             <option value="ACTIVE">Active</option>
@@ -80,8 +80,8 @@ export default function BuyerSuppliersPage() {
             {suppliers.map((s) => (
               <div key={s.id} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                    <Building2 size={20} className="text-green-700" />
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <Building2 size={20} className="text-blue-700" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     {statusIcon(s.status)}

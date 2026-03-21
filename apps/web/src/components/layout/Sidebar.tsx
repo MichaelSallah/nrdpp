@@ -13,6 +13,7 @@ const buyerNav = [
   { href: '/buyer/rfqs', label: 'My RFQs', icon: FileText },
   { href: '/buyer/rfqs/create', label: 'Create RFQ', icon: Package },
   { href: '/buyer/suppliers', label: 'Suppliers', icon: Users },
+  { href: '/buyer/team', label: 'Team', icon: Shield },
   { href: '/buyer/reports', label: 'Reports', icon: BarChart3 },
 ]
 
@@ -21,6 +22,7 @@ const supplierNav = [
   { href: '/supplier/rfqs', label: 'Open RFQs', icon: FileText },
   { href: '/supplier/quotations', label: 'My Quotations', icon: Award },
   { href: '/supplier/profile', label: 'Company Profile', icon: Building2 },
+  { href: '/supplier/team', label: 'Team', icon: Shield },
 ]
 
 const adminNav = [
@@ -46,14 +48,14 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-64 bg-green-900 min-h-screen flex flex-col">
+    <aside className="w-64 bg-blue-900 min-h-screen flex flex-col">
       {/* Logo */}
-      <div className="p-5 border-b border-green-700">
+      <div className="p-5 border-b border-blue-700">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-green-900 font-bold text-sm flex-shrink-0">GH</div>
+          <div className="w-9 h-9 bg-yellow-400 rounded-full flex items-center justify-center text-blue-900 font-bold text-sm flex-shrink-0">GH</div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">NRDPP</p>
-            <p className="text-green-400 text-xs">{portalLabel}</p>
+            <p className="text-blue-300 text-xs">{portalLabel}</p>
           </div>
         </div>
       </div>
@@ -69,8 +71,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
                 active
-                  ? 'bg-green-700 text-white shadow-sm'
-                  : 'text-green-300 hover:text-white hover:bg-green-800'
+                  ? 'bg-blue-700 text-white shadow-sm'
+                  : 'text-blue-300 hover:text-white hover:bg-blue-800'
               )}
             >
               <item.icon size={18} />
@@ -81,19 +83,19 @@ export function Sidebar() {
       </nav>
 
       {/* User + Logout */}
-      <div className="p-4 border-t border-green-700">
+      <div className="p-4 border-t border-blue-700">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center text-white text-sm font-medium">
+          <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center text-white text-sm font-medium">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-medium truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-green-400 text-xs truncate">{user?.email}</p>
+            <p className="text-blue-300 text-xs truncate">{user?.email}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 text-green-300 hover:text-white hover:bg-green-800 rounded-lg text-sm transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-2 text-blue-300 hover:text-white hover:bg-blue-800 rounded-lg text-sm transition-colors"
         >
           <LogOut size={16} /> Sign Out
         </button>

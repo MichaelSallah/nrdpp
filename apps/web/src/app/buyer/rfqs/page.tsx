@@ -36,10 +36,10 @@ export default function BuyerRfqsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by title or reference..."
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">All Statuses</option>
             <option value="DRAFT">Draft</option>
             <option value="OPEN">Open</option>
@@ -59,7 +59,7 @@ export default function BuyerRfqsPage() {
             <div className="p-12 text-center">
               <FileText size={48} className="text-gray-200 mx-auto mb-4" />
               <p className="text-gray-500">No RFQs found.</p>
-              <Link href="/buyer/rfqs/create" className="text-green-700 text-sm font-medium hover:underline mt-2 inline-block">Create your first RFQ</Link>
+              <Link href="/buyer/rfqs/create" className="text-blue-700 text-sm font-medium hover:underline mt-2 inline-block">Create your first RFQ</Link>
             </div>
           ) : (
             <table className="w-full text-sm">

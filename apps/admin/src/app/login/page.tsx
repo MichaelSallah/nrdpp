@@ -14,7 +14,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+const BASE = ''
 
 export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false)

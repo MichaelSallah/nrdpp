@@ -22,8 +22,10 @@ interface RfqDetail {
 
 interface Quotation {
   id: string; totalAmount: string; currency: string; deliveryDays: number | null
-  submittedAt: string; status: string
-  supplier: { companyName: string; riskScore: number }
+  submittedAt: string; status: string; taxMode: string
+  vatAmount: string | null; nhilAmount: string | null; getfundAmount: string | null
+  totalTax: string | null; grandTotal: string | null
+  supplier: { id: string; companyName: string; riskScore: number }
   evaluation: { totalScore: number; priceRank: number } | null
 }
 
@@ -32,9 +34,12 @@ export default function BuyerRfqDetailPage() {
   const router = useRouter()
   const [rfq, setRfq] = useState<RfqDetail | null>(null)
   const [quotations, setQuotations] = useState<Quotation[]>([])
-  const [tab, setTab] = useState<'overview' | 'quotations' | 'evaluation' | 'chat' | 'audit'>('overview')
+  const [tab, setTab] = useState<'overview' | 'quotations' | 'chat' | 'audit'>('overview')
   const [loading, setLoading] = useState(true)
   const [awardingId, setAwardingId] = useState<string | null>(null)
+  const [awardModal, setAwardModal] = useState<Quotation | null>(null)
+  const [justification, setJustification] = useState('')
+  const [awardError, setAwardError] = useState('')
 
   const deadlinePassed = rfq ? new Date() > new Date(rfq.submissionDeadline) : false
 
@@ -48,20 +53,24 @@ export default function BuyerRfqDetailPage() {
     }
   }, [tab, id, deadlinePassed])
 
-  const handleAward = async (quotation: Quotation) => {
-    const justification = prompt('Enter justification for awarding this supplier:')
-    if (!justification) return
-    setAwardingId(quotation.id)
+  const handleAward = async () => {
+    if (!awardModal || justification.length < 10) return
+    setAwardingId(awardModal.id)
+    setAwardError('')
     try {
       await api.post(`/api/rfqs/${id}/award`, {
-        supplierId: 'PLACEHOLDER', // Should be from quotation.supplier
-        quotationId: quotation.id,
+        supplierId: awardModal.supplier.id,
+        quotationId: awardModal.id,
         justification,
       })
-      alert('RFQ awarded successfully!')
-      router.refresh()
+      setAwardModal(null)
+      setJustification('')
+      // Reload page data
+      const r = await api.get<{ rfq: RfqDetail }>(`/api/rfqs/${id}`)
+      setRfq(r.rfq)
+      setTab('quotations')
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Failed to award')
+      setAwardError(e instanceof Error ? e.message : 'Failed to award')
     } finally { setAwardingId(null) }
   }
 
@@ -113,7 +122,7 @@ export default function BuyerRfqDetailPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1 w-fit">
-          {(['overview', 'quotations', 'evaluation', 'chat', 'audit'] as const).map((t) => (
+          {(['overview', 'quotations', 'chat', 'audit'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -178,41 +187,159 @@ export default function BuyerRfqDetailPage() {
                     <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">Below minimum ({rfq.minimumQuotations} required)</span>
                   )}
                 </div>
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-gray-100">
                   {quotations.map((q, i) => (
-                    <div key={q.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                          <p className="font-medium text-gray-900">{q.supplier.companyName}</p>
+                    <div key={q.id} className="p-4 hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                            <p className="font-medium text-gray-900">{q.supplier.companyName}</p>
+                          </div>
+                          <p className="text-xs text-gray-400 ml-8">Submitted {formatDateTime(q.submittedAt)}</p>
                         </div>
-                        <p className="text-xs text-gray-400 ml-8">Submitted {formatDateTime(q.submittedAt)}</p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="font-bold text-gray-900">{formatCurrency(q.totalAmount, q.currency)}</p>
-                          {q.deliveryDays && <p className="text-xs text-gray-400">{q.deliveryDays} days delivery</p>}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="font-bold text-green-700 text-lg">{formatCurrency(q.grandTotal || q.totalAmount, q.currency)}</p>
+                            {q.deliveryDays && <p className="text-xs text-gray-400">{q.deliveryDays} days delivery</p>}
+                          </div>
+                          {rfq.status !== 'AWARDED' && (
+                            <button
+                              onClick={() => { setAwardModal(q); setJustification(''); setAwardError('') }}
+                              className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-800"
+                            >
+                              <Award size={14} /> Award
+                            </button>
+                          )}
+                          {rfq.status === 'AWARDED' && rfq.award?.supplier.companyName === q.supplier.companyName && (
+                            <span className="flex items-center gap-1.5 text-green-700 text-xs font-semibold">
+                              <CheckCircle2 size={14} /> Awarded
+                            </span>
+                          )}
                         </div>
-                        {rfq.status !== 'AWARDED' && (
-                          <button
-                            onClick={() => handleAward(q)}
-                            disabled={awardingId === q.id}
-                            className="flex items-center gap-1.5 bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-800 disabled:opacity-60"
-                          >
-                            <Award size={14} /> Award
-                          </button>
-                        )}
-                        {rfq.status === 'AWARDED' && rfq.award?.supplier.companyName === q.supplier.companyName && (
-                          <span className="flex items-center gap-1.5 text-green-700 text-xs font-semibold">
-                            <CheckCircle2 size={14} /> Awarded
-                          </span>
-                        )}
                       </div>
+                      {/* Tax breakdown */}
+                      {q.grandTotal && (
+                        <div className="ml-8 mt-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${q.taxMode === 'AUTO' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {q.taxMode === 'AUTO' ? 'Auto Tax' : 'Manual Tax'}
+                            </span>
+                          </div>
+                          {q.taxMode === 'AUTO' ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                              <div className="bg-gray-50 rounded-md px-2 py-1.5">
+                                <p className="text-gray-400">Subtotal</p>
+                                <p className="font-semibold text-gray-700">{formatCurrency(q.totalAmount)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-md px-2 py-1.5">
+                                <p className="text-gray-400">VAT (15%)</p>
+                                <p className="font-medium text-gray-600">{formatCurrency(q.vatAmount || 0)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-md px-2 py-1.5">
+                                <p className="text-gray-400">NHIL (2.5%)</p>
+                                <p className="font-medium text-gray-600">{formatCurrency(q.nhilAmount || 0)}</p>
+                              </div>
+                              <div className="bg-gray-50 rounded-md px-2 py-1.5">
+                                <p className="text-gray-400">GETFund (2.5%)</p>
+                                <p className="font-medium text-gray-600">{formatCurrency(q.getfundAmount || 0)}</p>
+                              </div>
+                              <div className="bg-orange-50 rounded-md px-2 py-1.5">
+                                <p className="text-orange-500">Total Tax (20%)</p>
+                                <p className="font-semibold text-orange-700">{formatCurrency(q.totalTax || 0)}</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                              <div className="bg-gray-50 rounded-md px-2 py-1.5">
+                                <p className="text-gray-400">Subtotal</p>
+                                <p className="font-semibold text-gray-700">{formatCurrency(q.totalAmount)}</p>
+                              </div>
+                              <div className="bg-orange-50 rounded-md px-2 py-1.5">
+                                <p className="text-orange-500">Total Tax (Manual)</p>
+                                <p className="font-semibold text-orange-700">{formatCurrency(q.totalTax || 0)}</p>
+                              </div>
+                              <div className="bg-green-50 rounded-md px-2 py-1.5">
+                                <p className="text-green-600">Grand Total</p>
+                                <p className="font-semibold text-green-700">{formatCurrency(q.grandTotal || 0)}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* External evaluation info banner */}
+        {tab === 'quotations' && deadlinePassed && quotations.length > 0 && rfq.status !== 'AWARDED' && (
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800 flex items-start gap-3">
+            <BarChart3 size={18} className="flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold mb-1">Evaluation is conducted outside the system</p>
+              <p className="text-blue-700">Review the quotations above, conduct your evaluation process (committee review, technical assessment, etc.) offline, then return here to record the winning supplier by clicking the <strong>Award</strong> button.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Award confirmation modal */}
+        {awardModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <Award size={20} className="text-green-700" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Award RFQ</h3>
+                    <p className="text-xs text-gray-500">This action cannot be undone</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm">
+                  <p className="text-gray-500">Awarding to:</p>
+                  <p className="font-semibold text-gray-900">{awardModal.supplier.companyName}</p>
+                  <p className="text-green-700 font-bold mt-1">{formatCurrency(awardModal.grandTotal || awardModal.totalAmount, awardModal.currency)}</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Justification *</label>
+                  <textarea
+                    value={justification}
+                    onChange={(e) => setJustification(e.target.value)}
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    placeholder="Explain why this supplier was selected (e.g. best value, technical compliance, committee recommendation)..."
+                  />
+                  <p className="text-xs text-gray-400 mt-1">{justification.length}/10 characters minimum</p>
+                </div>
+
+                {awardError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{awardError}</div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setAwardModal(null)}
+                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAward}
+                    disabled={justification.length < 10 || awardingId === awardModal.id}
+                    className="flex-1 px-4 py-2.5 bg-green-700 text-white rounded-lg text-sm font-semibold hover:bg-green-800 disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {awardingId === awardModal.id ? 'Awarding...' : 'Confirm Award'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -254,7 +381,7 @@ function ChatRoom({ rfqId }: { rfqId: string }) {
         {messages.length === 0 && <p className="text-center text-gray-400 text-sm py-8">No messages yet. Use this room for clarification queries.</p>}
         {messages.map((m) => (
           <div key={m.id} className="flex gap-2">
-            <div className="w-7 h-7 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <div className="w-7 h-7 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
               {m.sender.firstName[0]}
             </div>
             <div>
@@ -265,7 +392,7 @@ function ChatRoom({ rfqId }: { rfqId: string }) {
         ))}
       </div>
       <div className="flex gap-2">
-        <input value={msg} onChange={(e) => setMsg(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder="Type a clarification message..." className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <input value={msg} onChange={(e) => setMsg(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder="Type a clarification message..." className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         <button onClick={send} disabled={sending || !msg.trim()} className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-800 disabled:opacity-60">Send</button>
       </div>
     </div>
@@ -285,7 +412,7 @@ function AuditLog({ rfqId }: { rfqId: string }) {
       <div className="space-y-2">
         {logs.map((log) => (
           <div key={log.id} className="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
-            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
+            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm text-gray-900">
                 <span className="font-medium capitalize">{log.action.replace(/_/g, ' ')}</span>

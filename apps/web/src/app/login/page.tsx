@@ -66,7 +66,7 @@ export default function LoginPage() {
   const activePortal = portals.find(p => p.role === portal)!
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 to-green-800 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800 flex flex-col">
       <PublicNav />
 
       <div className="flex-1 flex items-center justify-center p-6">
@@ -74,7 +74,7 @@ export default function LoginPage() {
 
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-white">Sign In to NRDPP</h1>
-            <p className="text-green-300 text-sm mt-1">Select your portal to continue</p>
+            <p className="text-blue-300 text-sm mt-1">Select your portal to continue</p>
           </div>
 
           {/* Portal selector */}
@@ -88,7 +88,7 @@ export default function LoginPage() {
                   'flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all text-sm font-medium',
                   portal === role
                     ? 'border-yellow-400 bg-yellow-400/10 text-yellow-300'
-                    : 'border-green-700 bg-green-800/50 text-green-400 hover:border-green-500 hover:text-green-200'
+                    : 'border-blue-700 bg-blue-800/50 text-blue-400 hover:border-blue-500 hover:text-blue-200'
                 )}
               >
                 <Icon size={20} />
@@ -100,7 +100,7 @@ export default function LoginPage() {
           <div className="bg-white rounded-2xl shadow-2xl p-8">
             {/* Portal header */}
             <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-700">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-700">
                 <activePortal.icon size={20} />
               </div>
               <div>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   placeholder={activePortal.placeholder}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
                     type={showPw ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                     {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -155,13 +155,13 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-gray-600 mt-5">
               No account?{' '}
-              <Link href={`/register?role=${portal}`} className="text-green-700 font-medium hover:underline">
+              <Link href={`/register?role=${portal}`} className="text-blue-700 font-medium hover:underline">
                 Register as {activePortal.label}
               </Link>
             </p>
           </div>
 
-          <p className="text-center text-green-400 text-xs mt-5">
+          <p className="text-center text-blue-400 text-xs mt-5">
             NRDPP – Secure Digital Procurement for All Sectors
           </p>
         </div>

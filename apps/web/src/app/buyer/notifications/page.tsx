@@ -50,7 +50,7 @@ export default function BuyerNotificationsPage() {
             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
           </p>
           {unreadCount > 0 && (
-            <button onClick={markAllRead} className="flex items-center gap-1.5 text-sm text-green-700 hover:text-green-800 font-medium">
+            <button onClick={markAllRead} className="flex items-center gap-1.5 text-sm text-blue-700 hover:text-blue-800 font-medium">
               <CheckCheck size={15} /> Mark all read
             </button>
           )}
@@ -69,7 +69,7 @@ export default function BuyerNotificationsPage() {
               {notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors ${!n.read ? 'bg-green-50/40' : ''}`}
+                  className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors ${!n.read ? 'bg-blue-50/40' : ''}`}
                   onClick={() => !n.read && markRead(n.id)}
                 >
                   <div className="text-xl shrink-0 mt-0.5">{TYPE_ICONS[n.type] || '🔔'}</div>
@@ -80,7 +80,7 @@ export default function BuyerNotificationsPage() {
                     </div>
                     <p className="text-sm text-gray-500 mt-0.5">{n.body}</p>
                   </div>
-                  {!n.read && <div className="w-2 h-2 rounded-full bg-green-500 shrink-0 mt-2" />}
+                  {!n.read && <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-2" />}
                 </div>
               ))}
             </div>

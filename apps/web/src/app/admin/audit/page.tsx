@@ -56,13 +56,13 @@ export default function AdminAuditPage() {
       <div className="p-6 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <ShieldCheck size={16} className="text-green-700" />
+            <ShieldCheck size={16} className="text-blue-700" />
             <span>{total.toLocaleString()} total events — append-only, immutable</span>
           </div>
           <select
             value={entityType}
             onChange={(e) => { setEntityType(e.target.value); setPage(1) }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Entity Types</option>
             <option value="rfq">RFQ</option>

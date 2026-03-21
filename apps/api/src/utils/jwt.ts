@@ -1,8 +1,16 @@
 import jwt from 'jsonwebtoken'
 import { AuthPayload } from '../middleware/auth'
 
-const getAccessSecret = () => process.env.JWT_SECRET || 'nrdpp_access_secret_key_minimum_32_chars'
-const getRefreshSecret = () => process.env.JWT_REFRESH_SECRET || 'nrdpp_refresh_secret_key_minimum_32_chars'
+const getAccessSecret = () => {
+  const secret = process.env.JWT_SECRET
+  if (!secret) throw new Error('JWT_SECRET environment variable is required')
+  return secret
+}
+const getRefreshSecret = () => {
+  const secret = process.env.JWT_REFRESH_SECRET
+  if (!secret) throw new Error('JWT_REFRESH_SECRET environment variable is required')
+  return secret
+}
 
 export function signAccessToken(payload: AuthPayload) {
   return jwt.sign(payload, getAccessSecret(), { expiresIn: '15m' })

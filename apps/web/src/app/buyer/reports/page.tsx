@@ -66,7 +66,7 @@ export default function BuyerReportsPage() {
         {/* RFQ Summary */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-4">
-            <FileText size={18} className="text-green-700" />
+            <FileText size={18} className="text-blue-700" />
             <h2 className="font-semibold text-gray-900">RFQ Summary</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -114,7 +114,7 @@ export default function BuyerReportsPage() {
         {/* Pricing Analytics */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={18} className="text-green-700" />
+            <TrendingUp size={18} className="text-blue-700" />
             <h2 className="font-semibold text-gray-900">Pricing Analytics</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -157,7 +157,7 @@ export default function BuyerReportsPage() {
         {/* Supplier Participation */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Users size={18} className="text-green-700" />
+            <Users size={18} className="text-blue-700" />
             <h2 className="font-semibold text-gray-900">Supplier Participation</h2>
           </div>
           {participation && participation.topSuppliers.length > 0 ? (

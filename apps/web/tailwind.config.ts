@@ -40,6 +40,7 @@ const config: Config = {
           red: '#CF0000',
           gold: '#FCD116',
           green: '#006B3F',
+          blue: '#1B4F8A',
         },
       },
       borderRadius: {

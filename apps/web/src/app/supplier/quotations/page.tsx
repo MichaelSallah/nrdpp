@@ -81,7 +81,7 @@ export default function SupplierQuotationsPage() {
             <div className="p-12 text-center">
               <FileText size={48} className="text-gray-200 mx-auto mb-4" />
               <p className="text-gray-500">No quotations submitted yet.</p>
-              <Link href="/supplier/rfqs" className="text-green-700 text-sm font-medium hover:underline mt-2 inline-block">
+              <Link href="/supplier/rfqs" className="text-blue-700 text-sm font-medium hover:underline mt-2 inline-block">
                 Browse open RFQs
               </Link>
             </div>
@@ -92,7 +92,7 @@ export default function SupplierQuotationsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {statusIcon(q.status)}
-                      <Link href={`/supplier/rfqs/${q.rfq.id}`} className="font-medium text-gray-900 hover:text-green-700 truncate">
+                      <Link href={`/supplier/rfqs/${q.rfq.id}`} className="font-medium text-gray-900 hover:text-blue-700 truncate">
                         {q.rfq.title}
                       </Link>
                     </div>

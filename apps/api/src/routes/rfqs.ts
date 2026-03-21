@@ -142,7 +142,7 @@ rfqRoutes.get('/', authenticate, async (req, res) => {
       where,
       include: {
         category: true,
-        entity: { select: { name: true, code: true, region: true } },
+        entity: { select: { name: true, code: true, region: true, sector: true } },
         _count: { select: { quotations: true, suppliers: true } },
       },
       skip,
@@ -151,6 +151,16 @@ rfqRoutes.get('/', authenticate, async (req, res) => {
     }),
     prisma.rfq.count({ where }),
   ])
+
+  // Strip quotation count from suppliers — they shouldn't see how many bids exist
+  if (user.role === Role.SUPPLIER) {
+    const sanitized = rfqs.map((rfq) => {
+      const plain = JSON.parse(JSON.stringify(rfq))
+      if (plain._count) { delete plain._count.quotations }
+      return plain
+    })
+    return res.json({ success: true, rfqs: sanitized, total, page: parseInt(page), totalPages: Math.ceil(total / parseInt(limit)) })
+  }
 
   res.json({ success: true, rfqs, total, page: parseInt(page), totalPages: Math.ceil(total / parseInt(limit)) })
 })
@@ -162,7 +172,7 @@ rfqRoutes.get('/:id', authenticate, async (req, res) => {
     include: {
       items: { orderBy: { itemNo: 'asc' } },
       category: true,
-      entity: { select: { name: true, code: true, region: true, email: true } },
+      entity: { select: { name: true, code: true, region: true, sector: true, email: true } },
       createdBy: { select: { firstName: true, lastName: true, email: true } },
       award: { include: { supplier: { select: { companyName: true } } } },
       _count: { select: { quotations: true, suppliers: true, chatMessages: true } },
@@ -176,6 +186,14 @@ rfqRoutes.get('/:id', authenticate, async (req, res) => {
       where: { rfqId: rfq.id, supplierId: req.user!.supplierId, viewedAt: null },
       data: { viewedAt: new Date() },
     })
+  }
+
+  // Strip quotation/supplier counts and createdBy from suppliers
+  if (req.user!.role === Role.SUPPLIER) {
+    const plain = JSON.parse(JSON.stringify(rfq))
+    if (plain._count) { delete plain._count.quotations; delete plain._count.suppliers }
+    delete plain.createdBy
+    return res.json({ success: true, rfq: plain })
   }
 
   res.json({ success: true, rfq })

@@ -39,6 +39,7 @@ adminRoutes.post('/entities', async (req, res) => {
     code: z.string().toUpperCase(),
     region: z.string(),
     type: z.string(),
+    sector: z.enum(['GOVERNMENT', 'PRIVATE']).default('GOVERNMENT'),
     address: z.string().optional(),
     phone: z.string().optional(),
     email: z.string().email().optional(),

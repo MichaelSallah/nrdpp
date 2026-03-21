@@ -1,4 +1,4 @@
-import { NotificationType } from '@prisma/client'
+import { NotificationType, Prisma } from '@prisma/client'
 import { prisma } from '../utils/prisma'
 import { io } from '../index'
 
@@ -7,7 +7,7 @@ interface NotificationInput {
   type: NotificationType
   title: string
   body: string
-  metadata?: Record<string, unknown>
+  metadata?: Prisma.InputJsonValue
 }
 
 export async function createNotification(input: NotificationInput) {

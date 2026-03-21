@@ -10,7 +10,7 @@ interface Rfq {
   id: string; referenceNo: string; title: string; type: string
   submissionDeadline: string; createdAt: string
   category: { name: string }
-  entity: { name: string; region: string }
+  entity: { name: string; region: string; sector?: string }
   _count: { quotations: number }
 }
 
@@ -31,7 +31,7 @@ export default function SupplierRfqMarketplace() {
         <div className="flex gap-3 mb-6">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search RFQs..." className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search RFQs..." className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
         </div>
 
@@ -47,11 +47,13 @@ export default function SupplierRfqMarketplace() {
             {rfqs.map((rfq) => {
               const urgent = new Date(rfq.submissionDeadline).getTime() - Date.now() < 24 * 3600_000
               return (
-                <Link key={rfq.id} href={`/supplier/rfqs/${rfq.id}`} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-all hover:border-green-200">
+                <Link key={rfq.id} href={`/supplier/rfqs/${rfq.id}`} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-all hover:border-blue-200">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">{rfq.type}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${rfq.entity.sector === 'PRIVATE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {rfq.entity.sector === 'PRIVATE' ? 'Private' : 'Government'}
+                        </span>
                         <span className="text-xs text-gray-400">{rfq.category.name}</span>
                       </div>
                       <h3 className="font-semibold text-gray-900">{rfq.title}</h3>

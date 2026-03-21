@@ -10,7 +10,7 @@ import { Countdown } from '@/components/ui/Countdown'
 interface Rfq {
   id: string; referenceNo: string; title: string; status: string
   submissionDeadline: string; category: { name: string }
-  entity: { name: string }
+  entity: { name: string; sector?: string }
   _count: { quotations: number }
 }
 interface Supplier { id: string; companyName: string; status: string; riskScore: number }
@@ -104,7 +104,7 @@ export default function SupplierDashboard() {
         {!supplier && !loading && (
           <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-5">
             <p className="font-medium text-blue-900">Complete your supplier profile to participate in RFQs</p>
-            <Link href="/supplier/onboarding" className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-700 font-medium hover:underline">
+            <Link href="/register/supplier" className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-700 font-medium hover:underline">
               Complete Profile <ArrowRight size={14} />
             </Link>
           </div>
@@ -154,7 +154,7 @@ export default function SupplierDashboard() {
         <div className="bg-white rounded-xl border border-gray-200">
           <div className="p-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-semibold text-gray-900">Open RFQs Matching Your Categories</h3>
-            <Link href="/supplier/rfqs" className="text-sm text-green-700 font-medium flex items-center gap-1 hover:underline">
+            <Link href="/supplier/rfqs" className="text-sm text-blue-700 font-medium flex items-center gap-1 hover:underline">
               View all <ArrowRight size={14} />
             </Link>
           </div>
@@ -181,7 +181,11 @@ export default function SupplierDashboard() {
                       </div>
                       <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                         <span>{rfq.referenceNo}</span><span>•</span>
-                        <span>{rfq.entity.name}</span><span>•</span>
+                        <span>{rfq.entity.name}</span>
+                        <span className={`px-1.5 py-0.5 rounded font-medium ${rfq.entity.sector === 'PRIVATE' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {rfq.entity.sector === 'PRIVATE' ? 'Private' : 'Gov'}
+                        </span>
+                        <span>•</span>
                         <span>{rfq.category.name}</span>
                       </div>
                     </div>

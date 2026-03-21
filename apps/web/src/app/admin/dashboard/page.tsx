@@ -82,7 +82,7 @@ export default function AdminDashboard() {
                 { href: '/admin/audit', label: 'View Audit Logs', desc: 'Platform-wide audit trail', icon: BarChart3 },
               ].map((a) => (
                 <Link key={a.href} href={a.href} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
-                  <div className="w-9 h-9 bg-green-100 text-green-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
                     <a.icon size={18} />
                   </div>
                   <div>

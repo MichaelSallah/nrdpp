@@ -4,11 +4,12 @@ import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
 import {
-  LayoutDashboard, Users, Building2, FileText, ShieldCheck, BarChart3, LogOut, Shield,
+  LayoutDashboard, Users, Building2, FileText, ShieldCheck, BarChart3, LogOut, Shield, UserCog,
 } from 'lucide-react'
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/users', label: 'Users', icon: UserCog },
   { href: '/suppliers', label: 'Suppliers', icon: Users },
   { href: '/entities', label: 'Entities', icon: Building2 },
   { href: '/rfqs', label: 'All RFQs', icon: FileText },

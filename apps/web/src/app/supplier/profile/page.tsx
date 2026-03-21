@@ -80,8 +80,8 @@ export default function SupplierProfilePage() {
       <TopBar title="Company Profile" />
       <div className="p-8 text-center">
         <p className="text-gray-500 mb-4">You haven&apos;t set up a supplier profile yet.</p>
-        <a href="/supplier/onboarding" className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-800">
-          Complete Onboarding
+        <a href="/register/supplier" className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-800">
+          Complete Registration
         </a>
       </div>
     </div>
@@ -95,8 +95,8 @@ export default function SupplierProfilePage() {
         {/* Header card */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
-              <Building2 size={32} className="text-green-700" />
+            <div className="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+              <Building2 size={32} className="text-blue-700" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
@@ -173,7 +173,7 @@ export default function SupplierProfilePage() {
               <select
                 value={uploadType}
                 onChange={(e) => setUploadType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Object.entries(DOC_LABELS).map(([val, label]) => (
                   <option key={val} value={val}>{label}</option>
@@ -219,7 +219,7 @@ export default function SupplierProfilePage() {
                       ) : (
                         <span className="text-xs text-gray-400">Pending review</span>
                       )}
-                      <a href={`http://localhost:5000${doc.fileUrl}`} target="_blank" rel="noreferrer" className="text-xs text-green-700 hover:underline">
+                      <a href={`http://localhost:5000${doc.fileUrl}`} target="_blank" rel="noreferrer" className="text-xs text-blue-700 hover:underline">
                         View
                       </a>
                     </div>

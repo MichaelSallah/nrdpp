@@ -19,6 +19,7 @@ import { notificationRoutes } from './routes/notifications'
 import { auditRoutes } from './routes/audit'
 import { reportRoutes } from './routes/reports'
 import { adminRoutes } from './routes/admin'
+import { teamRoutes } from './routes/team'
 import { errorHandler } from './middleware/errorHandler'
 import { setupChatSocket } from './services/chatSocket'
 import { startCronJobs } from './services/cronJobs'
@@ -73,6 +74,7 @@ app.use('/api/notifications', notificationRoutes)
 app.use('/api/audit', auditRoutes)
 app.use('/api/reports', reportRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/team', teamRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', time: new Date() }))
 

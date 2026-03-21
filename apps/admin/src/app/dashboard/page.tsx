@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AdminNav } from '@/components/layout/AdminNav'
 import { api } from '@/lib/api'
-import { Users, FileText, Award, AlertTriangle, BarChart3 } from 'lucide-react'
+import { Users, FileText, Award, AlertTriangle, BarChart3, UserCog } from 'lucide-react'
 import Link from 'next/link'
 
 interface PlatformStats {
@@ -81,6 +81,7 @@ export default function AdminDashboard() {
             <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div className="space-y-3">
               {[
+                { href: '/users', label: 'Manage All Users', desc: 'View and manage buyers, suppliers, and admins', icon: UserCog },
                 { href: '/suppliers?status=PENDING', label: 'Review Pending Suppliers', desc: 'Verify documents and activate accounts', icon: Users },
                 { href: '/rfqs', label: 'Monitor All RFQs', desc: 'Oversight of all platform RFQs', icon: FileText },
                 { href: '/audit', label: 'View Audit Logs', desc: 'Platform-wide audit trail', icon: BarChart3 },

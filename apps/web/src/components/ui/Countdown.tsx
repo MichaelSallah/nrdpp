@@ -46,8 +46,8 @@ export function Countdown({ deadline, variant = 'compact', className = '' }: Pro
 
   if (variant === 'full') {
     const urgent = t.days === 0 && t.hours < 24
-    const color = t.days === 0 && t.hours < 24 ? 'text-red-600' : t.days < 2 ? 'text-amber-600' : 'text-green-700'
-    const bg    = t.days === 0 && t.hours < 24 ? 'bg-red-50 border-red-200' : t.days < 2 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'
+    const color = t.days === 0 && t.hours < 24 ? 'text-red-600' : t.days < 2 ? 'text-amber-600' : 'text-blue-700'
+    const bg    = t.days === 0 && t.hours < 24 ? 'bg-red-50 border-red-200' : t.days < 2 ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'
 
     return (
       <div className={`inline-flex items-center gap-1 ${className}`}>

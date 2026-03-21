@@ -9,13 +9,20 @@ import {
   ArrowLeft, User, Building2, Tag, Loader2, ExternalLink, Clock, CalendarDays
 } from 'lucide-react'
 
-const REQUIRED_DOCS = [
-  { type: 'BUSINESS_REGISTRATION', label: 'Business Registration Documents' },
-  { type: 'VAT_REGISTRATION',      label: 'VAT Registration Certificate' },
-  { type: 'TAX_CLEARANCE',         label: 'Valid Tax Clearance Certificate' },
-  { type: 'SSNIT_CLEARANCE',       label: 'Valid SSNIT Clearance Certificate' },
-  { type: 'PPA_REGISTRATION',      label: 'Evidence of Registration with the PPA' },
+// Ghana legal framework — document compliance tiers
+type DocTier = 'UNIVERSAL' | 'GOVERNMENT' | 'RECOMMENDED'
+const ALL_DOCS = [
+  { type: 'BUSINESS_REGISTRATION', label: 'Business Registration Documents',     legalRef: 'Companies Act 2019, Act 992',        tier: 'UNIVERSAL' as DocTier,    description: 'Certificate of Incorporation, Constitution, Company Profile' },
+  { type: 'TAX_CLEARANCE',         label: 'Valid Tax Clearance Certificate',      legalRef: 'Income Tax Act 2015, Act 896',       tier: 'GOVERNMENT' as DocTier,   description: 'Issued by Ghana Revenue Authority (GRA)' },
+  { type: 'SSNIT_CLEARANCE',       label: 'Valid SSNIT Clearance Certificate',    legalRef: 'National Pensions Act 2008, Act 766', tier: 'GOVERNMENT' as DocTier,  description: 'Required for companies with employees' },
+  { type: 'PPA_REGISTRATION',      label: 'Evidence of Registration with the PPA', legalRef: 'Public Procurement Act 2003, Act 663', tier: 'GOVERNMENT' as DocTier, description: 'Registration on GHANEPS or PPA portal' },
+  { type: 'VAT_REGISTRATION',      label: 'VAT Registration Certificate',         legalRef: 'VAT Act 2013, Act 870',              tier: 'RECOMMENDED' as DocTier,  description: 'Required only if company meets VAT threshold' },
 ]
+const TIER_LABELS: Record<DocTier, { label: string; color: string; bgColor: string }> = {
+  UNIVERSAL:   { label: 'Mandatory',                    color: 'text-red-700',    bgColor: 'bg-red-100' },
+  GOVERNMENT:  { label: 'Gov\'t Procurement Required',  color: 'text-blue-700',   bgColor: 'bg-blue-100' },
+  RECOMMENDED: { label: 'Recommended',                  color: 'text-gray-600',   bgColor: 'bg-gray-100' },
+}
 
 interface Doc {
   id: string; type: string; fileName: string; fileUrl: string
@@ -138,12 +145,24 @@ export default function AdminSupplierDetailPage() {
   const formatSize = (bytes: number) =>
     bytes > 1024 * 1024 ? (bytes / (1024 * 1024)).toFixed(1) + ' MB' : Math.round(bytes / 1024) + ' KB'
 
-  const allCompliant = REQUIRED_DOCS.every((d) => {
+  // Universal docs (Act 992) — blocks ALL bidding if missing/expired
+  const universalDocs = ALL_DOCS.filter((d) => d.tier === 'UNIVERSAL')
+  const universalCompliant = universalDocs.every((d) => {
     const docs = getDocsOfType(d.type)
     return docs.length > 0 && docs.every((doc) => expiryStatus(doc) !== 'expired')
   })
+  const universalIssues = universalDocs.filter((d) => {
+    const docs = getDocsOfType(d.type)
+    return docs.length === 0 || docs.some((doc) => expiryStatus(doc) === 'expired')
+  }).length
 
-  const missingOrExpired = REQUIRED_DOCS.filter((d) => {
+  // Government docs (Acts 896, 766, 663) — blocks Gov't RFQ bidding if missing/expired
+  const govDocs = ALL_DOCS.filter((d) => d.tier === 'GOVERNMENT')
+  const govCompliant = govDocs.every((d) => {
+    const docs = getDocsOfType(d.type)
+    return docs.length > 0 && docs.every((doc) => expiryStatus(doc) !== 'expired')
+  })
+  const govIssues = govDocs.filter((d) => {
     const docs = getDocsOfType(d.type)
     return docs.length === 0 || docs.some((doc) => expiryStatus(doc) === 'expired')
   }).length
@@ -181,7 +200,7 @@ export default function AdminSupplierDetailPage() {
             <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
               <h3 className="font-bold text-gray-900 mb-1">Set Document Expiry Date</h3>
               <p className="text-sm text-gray-500 mb-4">
-                {REQUIRED_DOCS.find(d => d.type === pendingUpload.type)?.label}
+                {ALL_DOCS.find(d => d.type === pendingUpload.type)?.label}
                 <br /><span className="text-xs text-gray-400">{pendingUpload.file.name}</span>
               </p>
               <div className="mb-4">
@@ -220,8 +239,11 @@ export default function AdminSupplierDetailPage() {
                 {supplier.status === 'PENDING' && (
                   <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold animate-pulse">Awaiting Approval</span>
                 )}
-                {!allCompliant && supplier.status === 'ACTIVE' && (
-                  <span className="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-full font-semibold">Bidding Blocked — {missingOrExpired} doc(s) expired/missing</span>
+                {!universalCompliant && supplier.status === 'ACTIVE' && (
+                  <span className="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-full font-semibold">All Bidding Blocked — {universalIssues} mandatory doc(s) missing/expired</span>
+                )}
+                {universalCompliant && !govCompliant && supplier.status === 'ACTIVE' && (
+                  <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold">Cannot bid on Gov&apos;t RFQs — {govIssues} doc(s) missing</span>
                 )}
               </div>
               <p className="text-sm text-gray-500">Reg No: {supplier.registrationNo} · Tax ID: {supplier.taxId}</p>
@@ -297,26 +319,36 @@ export default function AdminSupplierDetailPage() {
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h2 className="font-semibold text-gray-900">Required Documents</h2>
-                {allCompliant
-                  ? <span className="flex items-center gap-1.5 text-xs text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-full"><CheckCircle2 size={13} /> All compliant — bidding enabled</span>
-                  : <span className="flex items-center gap-1.5 text-xs text-red-700 font-semibold bg-red-50 px-2.5 py-1 rounded-full"><XCircle size={13} /> {missingOrExpired} issue(s) — bidding blocked</span>
-                }
+                <div className="flex items-center gap-2 flex-wrap">
+                  {universalCompliant
+                    ? <span className="flex items-center gap-1.5 text-xs text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-full"><CheckCircle2 size={13} /> Mandatory docs OK</span>
+                    : <span className="flex items-center gap-1.5 text-xs text-red-700 font-semibold bg-red-50 px-2.5 py-1 rounded-full"><XCircle size={13} /> {universalIssues} mandatory issue(s)</span>
+                  }
+                  {govCompliant
+                    ? <span className="flex items-center gap-1.5 text-xs text-blue-700 font-semibold bg-blue-50 px-2.5 py-1 rounded-full"><CheckCircle2 size={13} /> Gov&apos;t procurement ready</span>
+                    : <span className="flex items-center gap-1.5 text-xs text-amber-700 font-semibold bg-amber-50 px-2.5 py-1 rounded-full"><AlertTriangle size={13} /> {govIssues} gov&apos;t doc(s) missing</span>
+                  }
+                </div>
               </div>
 
               <div className="space-y-4">
-                {REQUIRED_DOCS.map(({ type, label }) => {
+                {ALL_DOCS.map(({ type, label, legalRef, tier, description }) => {
                   const docs = getDocsOfType(type)
                   const hasDoc = docs.length > 0
                   const anyExpired = docs.some((d) => expiryStatus(d) === 'expired')
                   const anyExpiring = docs.some((d) => expiryStatus(d) === 'expiring')
-                  const borderCls = anyExpired ? 'border-red-200 bg-red-50/30' : anyExpiring ? 'border-amber-200 bg-amber-50/30' : hasDoc ? 'border-green-200 bg-green-50/30' : 'border-gray-200'
-                  const iconEl = anyExpired
+                  const isBlocking = tier !== 'RECOMMENDED'
+                  const borderCls = isBlocking && anyExpired ? 'border-red-200 bg-red-50/30' : anyExpiring ? 'border-amber-200 bg-amber-50/30' : hasDoc ? 'border-green-200 bg-green-50/30' : tier === 'RECOMMENDED' ? 'border-gray-200 bg-gray-50/30' : 'border-gray-200'
+                  const tierStyle = TIER_LABELS[tier]
+                  const iconEl = isBlocking && anyExpired
                     ? <XCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
                     : anyExpiring
                       ? <Clock size={18} className="text-amber-500 shrink-0 mt-0.5" />
                       : hasDoc
                         ? <CheckCircle2 size={18} className="text-green-600 shrink-0 mt-0.5" />
-                        : <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                        : tier === 'RECOMMENDED'
+                          ? <FileText size={18} className="text-gray-400 shrink-0 mt-0.5" />
+                          : <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
 
                   return (
                     <div key={type} className={`border rounded-xl p-4 ${borderCls}`}>
@@ -324,10 +356,30 @@ export default function AdminSupplierDetailPage() {
                         <div className="flex items-start gap-2.5">
                           {iconEl}
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{label}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {anyExpired ? 'Document expired — supplier cannot bid' : anyExpiring ? 'Expiring soon — renew urgently' : hasDoc ? `${docs.length} file(s) uploaded` : 'No document uploaded yet'}
-                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-sm font-medium text-gray-900">{label}</p>
+                              <span className={`text-xs ${tierStyle.bgColor} ${tierStyle.color} px-1.5 py-0.5 rounded font-medium`}>{tierStyle.label}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+                            <p className="text-xs text-gray-400 mt-0.5 italic">{legalRef}</p>
+                            {!hasDoc && tier === 'RECOMMENDED' && (
+                              <p className="text-xs text-gray-400 mt-0.5">Optional — does not block bidding. Only required if company meets VAT threshold.</p>
+                            )}
+                            {!hasDoc && tier === 'GOVERNMENT' && (
+                              <p className="text-xs text-amber-600 mt-0.5">Required for Government Entity RFQs only — not needed for Private Entity RFQs</p>
+                            )}
+                            {!hasDoc && tier === 'UNIVERSAL' && (
+                              <p className="text-xs text-red-600 mt-0.5 font-medium">Missing — supplier cannot bid on ANY RFQ</p>
+                            )}
+                            {anyExpired && isBlocking && (
+                              <p className="text-xs text-red-600 mt-0.5 font-medium">Document expired — {tier === 'UNIVERSAL' ? 'blocks all bidding' : 'blocks Government RFQ bidding'}</p>
+                            )}
+                            {!anyExpired && hasDoc && !anyExpiring && (
+                              <p className="text-xs text-green-600 mt-0.5">{docs.length} file(s) uploaded</p>
+                            )}
+                            {anyExpiring && (
+                              <p className="text-xs text-amber-600 mt-0.5">Expiring soon — renew urgently</p>
+                            )}
                           </div>
                         </div>
                         <div>
@@ -386,9 +438,12 @@ export default function AdminSupplierDetailPage() {
                 })}
               </div>
 
-              <p className="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-100">
-                * Suppliers will be automatically blocked from submitting quotations if any required document is missing or expired.
-              </p>
+              <div className="mt-4 pt-3 border-t border-gray-100 space-y-1">
+                <p className="text-xs text-gray-500 font-medium">Document Compliance Tiers:</p>
+                <p className="text-xs text-gray-400"><span className="font-semibold text-red-600">Mandatory</span> — Business Registration (Act 992): blocks ALL bidding if missing or expired</p>
+                <p className="text-xs text-gray-400"><span className="font-semibold text-blue-600">Gov&apos;t Procurement</span> — Tax Clearance (Act 896), SSNIT (Act 766), PPA (Act 663): required for Government Entity RFQs only</p>
+                <p className="text-xs text-gray-400"><span className="font-semibold text-gray-500">Recommended</span> — VAT Registration (Act 870): threshold-dependent, never blocks bidding</p>
+              </div>
             </div>
           </div>
         </div>

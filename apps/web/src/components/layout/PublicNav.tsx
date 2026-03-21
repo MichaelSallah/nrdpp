@@ -15,19 +15,19 @@ export function PublicNav() {
   const pathname = usePathname()
 
   return (
-    <header className="bg-green-900 border-b border-green-700 sticky top-0 z-30">
+    <header className="bg-blue-900 border-b border-blue-700 sticky top-0 z-30">
       {/* Brand row */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-green-900 font-bold text-xs flex-shrink-0">GH</div>
+          <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-blue-900 font-bold text-xs flex-shrink-0">GH</div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">NRDPP</p>
-            <p className="text-green-400 text-xs leading-tight hidden sm:block">National RFQ Digital Procurement Platform</p>
+            <p className="text-blue-300 text-xs leading-tight hidden sm:block">National RFQ Digital Procurement Platform</p>
           </div>
         </Link>
         <Link
           href="/login"
-          className="bg-yellow-400 text-green-900 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-300 transition-colors"
+          className="bg-yellow-400 text-blue-900 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-300 transition-colors"
         >
           Sign In
         </Link>
@@ -46,7 +46,7 @@ export function PublicNav() {
                 'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all',
                 active
                   ? 'border-yellow-400 text-yellow-400'
-                  : 'border-transparent text-green-300 hover:text-white hover:border-green-500'
+                  : 'border-transparent text-blue-300 hover:text-white hover:border-blue-500'
               )}
             >
               <Icon size={14} />

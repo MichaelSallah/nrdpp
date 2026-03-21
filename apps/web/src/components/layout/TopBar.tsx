@@ -82,7 +82,7 @@ export function TopBar({ title }: { title: string }) {
               className={cn(
                 'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all',
                 active
-                  ? 'border-green-700 text-green-700 bg-green-50'
+                  ? 'border-blue-700 text-blue-700 bg-blue-50'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               )}
             >

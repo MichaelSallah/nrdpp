@@ -216,6 +216,7 @@ supplierRoutes.patch('/:id/status', authenticate, authorize(Role.ADMIN), async (
 })
 
 // ── Compliance check ──
+// Optional query param ?entityId= to check compliance for a specific entity (Government vs Private)
 supplierRoutes.get('/:id/compliance', authenticate, async (req, res) => {
   const id = String(req.params.id)
   const supplierWithDocs = await prisma.supplier.findUnique({
@@ -224,19 +225,35 @@ supplierRoutes.get('/:id/compliance', authenticate, async (req, res) => {
   })
   if (!supplierWithDocs) throw new AppError('Supplier not found', 404)
 
+  // Determine entity sector context — affects which docs are mandatory
+  const entityId = req.query.entityId as string | undefined
+  let isGovernment = true // default: assume government (stricter)
+  if (entityId) {
+    const entity = await prisma.entity.findUnique({ where: { id: entityId }, select: { sector: true } })
+    if (entity) isGovernment = entity.sector === 'GOVERNMENT'
+  }
+
   const supplier = supplierWithDocs
   const today = new Date()
   const soonThreshold = new Date(today.getTime() + 30 * 86_400_000)
   const issues: string[] = []
   const warnings: string[] = []
 
-  const REQUIRED = [
-    { type: DocumentType.BUSINESS_REGISTRATION, label: 'Business Registration Documents' },
-    { type: DocumentType.VAT_REGISTRATION,      label: 'VAT Registration Certificate' },
-    { type: DocumentType.TAX_CLEARANCE,         label: 'Tax Clearance Certificate' },
-    { type: DocumentType.SSNIT_CLEARANCE,       label: 'SSNIT Clearance Certificate' },
-    { type: DocumentType.PPA_REGISTRATION,      label: 'PPA Registration' },
+  // Ghana legal framework document tiers:
+  // UNIVERSAL: Business Registration (Act 992) — always mandatory
+  // GOVERNMENT: Tax Clearance (Act 896), SSNIT (Act 766), PPA (Act 663) — public procurement only
+  // RECOMMENDED: VAT Registration (Act 870) — threshold-dependent, never blocks
+  const ALL_DOCS = [
+    { type: DocumentType.BUSINESS_REGISTRATION, label: 'Business Registration Documents (Act 992)',  tier: 'UNIVERSAL' as const },
+    { type: DocumentType.TAX_CLEARANCE,         label: 'Tax Clearance Certificate (Act 896)',        tier: 'GOVERNMENT' as const },
+    { type: DocumentType.SSNIT_CLEARANCE,       label: 'SSNIT Clearance Certificate (Act 766)',      tier: 'GOVERNMENT' as const },
+    { type: DocumentType.PPA_REGISTRATION,      label: 'PPA Registration (Act 663)',                 tier: 'GOVERNMENT' as const },
+    { type: DocumentType.VAT_REGISTRATION,      label: 'VAT Registration Certificate (Act 870)',     tier: 'RECOMMENDED' as const },
   ]
+
+  const REQUIRED = ALL_DOCS.filter((r) =>
+    r.tier === 'UNIVERSAL' || (r.tier === 'GOVERNMENT' && isGovernment)
+  )
 
   for (const { type, label } of REQUIRED) {
     const doc = supplier.documents.find((d: { type: DocumentType }) => d.type === type)
@@ -252,6 +269,17 @@ supplierRoutes.get('/:id/compliance', authenticate, async (req, res) => {
     }
   }
 
+  // Check VAT as a recommendation (not blocking)
+  const vatDoc = supplier.documents.find((d: { type: DocumentType }) => d.type === DocumentType.VAT_REGISTRATION)
+  if (!vatDoc) {
+    warnings.push('VAT Registration Certificate (Act 870) — not uploaded (recommended if VAT-applicable)')
+  } else {
+    const vd = vatDoc as { type: DocumentType; expiryDate: Date | null }
+    if (vd.expiryDate && vd.expiryDate < soonThreshold) {
+      warnings.push(`VAT Registration Certificate — expires on ${vd.expiryDate.toLocaleDateString()}`)
+    }
+  }
+
   res.json({
     success: true,
     supplierId: supplier.id,
@@ -261,5 +289,6 @@ supplierRoutes.get('/:id/compliance', authenticate, async (req, res) => {
     canBid: issues.length === 0,
     issues,
     warnings,
+    isGovernmentEntity: isGovernment,
   })
 })

@@ -82,9 +82,9 @@ export default function SupplierOnboardingPage() {
         <div className="flex items-center gap-2 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${i <= step ? 'bg-green-700 text-white' : 'bg-gray-200 text-gray-500'}`}>{i + 1}</div>
-              <span className={`text-sm hidden sm:block ${i === step ? 'text-green-700 font-medium' : 'text-gray-400'}`}>{s}</span>
-              {i < STEPS.length - 1 && <div className={`h-px w-6 ${i < step ? 'bg-green-700' : 'bg-gray-200'}`} />}
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${i <= step ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-500'}`}>{i + 1}</div>
+              <span className={`text-sm hidden sm:block ${i === step ? 'text-blue-700 font-medium' : 'text-gray-400'}`}>{s}</span>
+              {i < STEPS.length - 1 && <div className={`h-px w-6 ${i < step ? 'bg-blue-700' : 'bg-gray-200'}`} />}
             </div>
           ))}
         </div>
@@ -98,29 +98,29 @@ export default function SupplierOnboardingPage() {
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Company Information</h2>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
-                  <input {...register('companyName')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  <input {...register('companyName')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Business Registration No. *</label>
-                    <input {...register('registrationNo')} placeholder="CS000000000" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <input {...register('registrationNo')} placeholder="CS000000000" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     {errors.registrationNo && <p className="text-red-500 text-xs mt-1">{errors.registrationNo.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">TIN (GRA) *</label>
-                    <input {...register('taxId')} placeholder="C0000000000" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <input {...register('taxId')} placeholder="C0000000000" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     {errors.taxId && <p className="text-red-500 text-xs mt-1">{errors.taxId.message}</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">SSNIT Number</label>
-                    <input {...register('ssnitNo')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <input {...register('ssnitNo')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Business Type *</label>
-                    <select {...register('businessType')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select {...register('businessType')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="">Select</option>
                       <option value="Limited Company">Limited Company</option>
                       <option value="Sole Proprietorship">Sole Proprietorship</option>
@@ -132,7 +132,7 @@ export default function SupplierOnboardingPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Description</label>
-                  <textarea {...register('description')} rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none" placeholder="Brief description of your business..." />
+                  <textarea {...register('description')} rows={3} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Brief description of your business..." />
                 </div>
               </div>
             )}
@@ -142,18 +142,18 @@ export default function SupplierOnboardingPage() {
                 <h2 className="text-lg font-bold text-gray-900 mb-4">Location</h2>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
-                  <input {...register('address')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="P.O. Box or street address" />
+                  <input {...register('address')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="P.O. Box or street address" />
                   {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                    <input {...register('city')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g. Accra" />
+                    <input {...register('city')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Accra" />
                     {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Region *</label>
-                    <select {...register('region')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select {...register('region')} className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="">Select region</option>
                       {GHANA_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                     </select>
@@ -162,7 +162,7 @@ export default function SupplierOnboardingPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Website (optional)</label>
-                  <input {...register('website')} type="url" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="https://yourcompany.com" />
+                  <input {...register('website')} type="url" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://yourcompany.com" />
                 </div>
               </div>
             )}

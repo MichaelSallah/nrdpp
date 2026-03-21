@@ -40,16 +40,16 @@ export default function HomePage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-700">
+      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-green-800 border border-green-600 rounded-full px-4 py-1.5 text-green-200 text-sm mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-800 border border-blue-600 rounded-full px-4 py-1.5 text-blue-200 text-sm mb-6">
             <Shield size={14} /> {"Ghana's National Digital Procurement Platform"}
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
             Transparent, Fast &amp;<br />
             <span className="text-yellow-400">Compliant Procurement</span>
           </h1>
-          <p className="text-green-200 text-lg max-w-2xl mx-auto mb-10">
+          <p className="text-blue-200 text-lg max-w-2xl mx-auto mb-10">
             NRDPP connects verified suppliers with public and private sector buyers across Ghana — from RFQ to award in one secure, auditable platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -61,12 +61,12 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="mt-6">
-            <Link href="/rfqs" className="text-green-300 hover:text-white text-sm underline underline-offset-4 transition-colors">
+            <Link href="/rfqs" className="text-blue-300 hover:text-white text-sm underline underline-offset-4 transition-colors">
               Browse Open RFQs — No Account Needed
             </Link>
           </div>
         </div>
-        <div className="border-t border-green-700 bg-green-900/50">
+        <div className="border-t border-blue-700 bg-blue-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
               { label: 'Verified Suppliers', value: activeSuppliers > 0 ? activeSuppliers + '+' : '1,200+' },
@@ -76,7 +76,7 @@ export default function HomePage() {
             ].map((s) => (
               <div key={s.label}>
                 <div className="text-3xl font-bold text-yellow-400">{s.value}</div>
-                <div className="text-green-300 text-sm mt-1">{s.label}</div>
+                <div className="text-blue-300 text-sm mt-1">{s.label}</div>
               </div>
             ))}
           </div>
@@ -112,7 +112,7 @@ export default function HomePage() {
                 <h2 className="text-2xl font-bold text-gray-900">Open RFQs</h2>
                 <p className="text-gray-500 text-sm mt-1">Currently accepting quotations</p>
               </div>
-              <Link href="/rfqs" className="flex items-center gap-1.5 text-green-700 font-medium text-sm hover:underline">
+              <Link href="/rfqs" className="flex items-center gap-1.5 text-blue-700 font-medium text-sm hover:underline">
                 View all <ArrowRight size={14} />
               </Link>
             </div>
@@ -154,7 +154,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {steps.map((s) => (
             <div key={s.step} className="text-center">
-              <div className="w-14 h-14 bg-green-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-lg">{s.step}</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">{s.title}</h3>
@@ -165,11 +165,11 @@ export default function HomePage() {
       </section>
 
       {/* Platform features */}
-      <section className="bg-green-900">
+      <section className="bg-blue-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-white">{"Built for Ghana's Procurement Framework"}</h2>
-            <p className="text-green-300 text-sm mt-2">Compliant with Public Procurement Authority guidelines</p>
+            <p className="text-blue-300 text-sm mt-2">Compliant with Public Procurement Authority guidelines</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
@@ -183,7 +183,7 @@ export default function HomePage() {
               <div key={f.title} className="bg-white/10 border border-white/10 rounded-xl p-6 backdrop-blur">
                 <f.icon className="text-yellow-400 mb-4" size={28} />
                 <h3 className="text-white font-semibold mb-2">{f.title}</h3>
-                <p className="text-green-200 text-sm leading-relaxed">{f.desc}</p>
+                <p className="text-blue-200 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
